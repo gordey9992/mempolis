@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МЕМПОЛИС - Столица мемов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #ff6b6b;
+            --success: #4ecdc4;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 10px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            border-radius: 20px;
+            margin-bottom: 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(45deg) translateX(-100%); }
+            100% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 800;
+            position: relative;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .tagline img {
+            height: 28px;
+            margin: 4px;
+            border-radius: 6px;
+            transition: transform 0.3s ease;
+        }
+
+        .tagline img:hover {
+            transform: scale(1.1);
+        }
+
+        .content-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .content-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .old-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: transparent;
+            margin-bottom: 25px;
+        }
+
+        .menu-item {
+            background: var(--dark);
+            padding: 16px 12px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .menu-item:hover::before {
+            left: 100%;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: var(--accent);
+        }
+
+        .menu-item.active {
+            background: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            background: var(--dark);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--success);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        button.primary {
+            background: var(--accent);
+        }
+
+        button.success {
+            background: var(--success);
+        }
+
+        button.warning {
+            background: #f39c12;
+        }
+
+        .meme-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .meme-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .meme-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .meme-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .meme-card:hover .meme-img {
+            transform: scale(1.1);
+        }
+
+        .meme-caption {
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .meme-reactions {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: var(--light);
+            border-top: 1px solid #e9ecef;
+        }
+
+        .reaction {
+            cursor: pointer;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .reaction:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .upload-tabs {
+            display: flex;
+            background: var(--light);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .upload-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .upload-tab.active {
+            background: white;
+            color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(255, 107, 107, 0.05);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: rotate(10deg) scale(1.2);
+        }
+
+        .content-type-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .type-btn {
+            padding: 15px 10px;
+            border: 2px solid var(--primary);
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .type-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .type-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .feed-container {
+            width: 100%;
+            height: 500px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            background: black;
+        }
+
+        .feed-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        .feed-item.active {
+            display: block;
+        }
+
+        .feed-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .feed-controls {
+            position: absolute;
+            right: 15px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .feed-btn {
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feed-btn:hover {
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.2);
+        }
+
+        .feed-info {
+            position: absolute;
+            bottom: 30px;
+            left: 15px;
+            color: white;
+            z-index: 10;
+        }
+
+        .auth-panel {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .user-info {
+            display: none;
+        }
+
+        .user-info.active {
+            display: block;
+        }
+
+        .auth-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #bdc3c7;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background: #ff0000;
+            opacity: 0;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: var(--accent);
+        }
+
+        .notification.warning {
+            background: #f39c12;
+        }
+
+        .special-meme {
+            border: 3px solid gold;
+            box-shadow: 0 0 20px gold;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px gold; }
+            to { box-shadow: 0 0 20px orange; }
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 1200px;
+                padding: 30px;
+            }
+            
+            header {
+                padding: 40px;
+            }
+            
+            h1 {
+                font-size: 3.5rem;
+            }
+            
+            .old-menu {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .controls {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .meme-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .content-type-selector {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .feed-container {
+                max-width: 400px;
+                height: 700px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .menu-item {
+                font-size: 0.85rem;
+                padding: 14px 8px;
+            }
+            
+            button {
+                font-size: 0.85rem;
+                padding: 14px 8px;
+            }
+            
+            .stat-value {
+                font-size: 1.7rem;
+            }
+            
+            .tagline img {
+                height: 22px;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="old-menu">
+            <div class="menu-item active" onclick="switchSection('memes')">📷 Мемы</div>
+            <div class="menu-item" onclick="switchSection('videos')">🎬 Видео</div>
+            <div class="menu-item" onclick="switchSection('audio')">🎵 Музыка</div>
+            <div class="menu-item" onclick="switchSection('feed')">📱 Лента</div>
+            <div class="menu-item" onclick="switchSection('upload')">📤 Загрузить</div>
+            <div class="menu-item" onclick="switchSection('account')">👤 Аккаунт</div>
+        </div>
+
+        <header>
+            <h1>МЕМПОЛИС</h1>
+            <div class="tagline">
+                <img src="https://img.shields.io/badge/МЕМПОЛИС-Столица%20мемов-purple" alt="МЕМПОЛИС">
+                <img src="https://img.shields.io/badge/Версия-3.0-blue" alt="Версия 3.0">
+                <img src="https://img.shields.io/badge/Онлайн-🟢-brightgreen" alt="Онлайн">
+                <img src="https://img.shields.io/badge/Стиль-🎨-orange" alt="Стиль">
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalMemes">0</div>
+                <div class="stat-label">Всего мемов</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="onlineUsers">248</div>
+                <div class="stat-label">Онлайн</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="userRating">4.9</div>
+                <div class="stat-label">Рейтинг</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="todayViews">5.2k</div>
+                <div class="stat-label">Просмотров</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="addRandomMeme()">🎲 Случайный мем</button>
+            <button class="primary" onclick="showSurprise()">🎁 Сюрприз</button>
+            <button class="success" onclick="showSpecialMemes()">⭐ Особые мемы</button>
+            <button class="warning" onclick="toggleSound()">🔊 Звук: Вкл</button>
+        </div>
+
+        <div id="memes" class="content-section active">
+            <h2 style="text-align: center; margin-bottom: 25px; color: var(--dark); font-size: 2rem;">🔥 Популярные мемы</h2>
+            <div class="meme-grid" id="memeContainer">
+            </div>
+        </div>
+
+        <div id="videos" class="content-section">
+            <h2 style="text-align: center; margin-bottom: 25px; color: var(--dark); font-size: 2rem;">🎬 Видео мемы</h2>
+            <div class="meme-grid" id="videoContainer">
+            </div>
+        </div>
+
+        <div id="audio" class="content-section">
+            <h2 style="text-align: center; margin-bottom: 25px; color: var(--dark); font-size: 2rem;">🎵 Мемная музыка</h2>
+            <div class="meme-grid" id="audioContainer">
+            </div>
+        </div>
+
+        <div id="feed" class="content-section">
+            <h2 style="text-align: center; margin-bottom: 25px; color: var(--dark); font-size: 2rem;">📱 Лента TikTok-style</h2>
+            <div class="feed-container" id="feedContainer">
+                <div style="color: white; text-align: center; padding-top: 200px;">
+                    <h3 style="margin-bottom: 15px; font-size: 1.5rem;">Загрузите первое видео!</h3>
+                    <p>Используйте раздел "Загрузить" → "Остальное"</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="prevFeedItem()">⬅️ Назад</button>
+                <button onclick="nextFeedItem()">Далее ➡️</button>
+            </div>
+        </div>
+
+        <div id="upload" class="content-section">
+            <h2 style="text-align: center; margin-bottom: 25px; color: var(--dark); font-size: 2rem;">📤 Загрузить контент</h2>
+            
+            <div class="upload-tabs">
+                <div class="upload-tab active" onclick="switchUploadTab('meme')">📷 Мемы</div>
+                <div class="upload-tab" onclick="switchUploadTab('other')">📹 Остальное</div>
+            </div>
+
+            <div id="memeUpload" class="upload-tab-content">
+                <div class="upload-area" onclick="document.getElementById('memeFileInput').click()">
+                    <div class="upload-icon">📷</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Загрузить мем</div>
+                    <div style="font-size: 0.9rem; color: #666;">Только изображения: JPG, PNG, GIF</div>
+                    <input type="file" id="memeFileInput" accept="image/*" style="display: none;" onchange="handleMemeUpload(event)">
+                </div>
+                
+                <div id="memeUploadPreview" style="display: none; text-align: center;">
+                    <img id="memePreviewImg" style="max-width: 100%; border-radius: 15px; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                    <input type="text" id="memeCaptionInput" placeholder="📝 Добавьте смешную подпись..." style="width: 100%; padding: 15px; margin: 15px 0; border: 2px solid var(--primary); border-radius: 12px; font-size: 1rem;">
+                    <button onclick="publishMeme()" style="width: 100%; max-width: 300px;">🚀 Опубликовать мем</button>
+                </div>
+            </div>
+
+            <div id="otherUpload" class="upload-tab-content" style="display: none;">
+                <div class="content-type-selector">
+                    <div class="type-btn active" data-type="video" onclick="selectContentType('video')">🎬 Видео</div>
+                    <div class="type-btn" data-type="audio" onclick="selectContentType('audio')">🎵 Аудио</div>
+                    <div class="type-btn" data-type="feed" onclick="selectContentType('feed')">📱 В ленту</div>
+                    <div class="type-btn" data-type="photo" onclick="selectContentType('photo')">🖼️ Фото</div>
+                </div>
+
+                <div class="upload-area" onclick="document.getElementById('otherFileInput').click()">
+                    <div class="upload-icon" id="otherUploadIcon">🎬</div>
+                    <div id="otherUploadText" style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">Загрузить видео</div>
+                    <div style="font-size: 0.9rem; color: #666;" id="otherUploadSubtext">MP4, WEBM, MOV</div>
+                    <input type="file" id="otherFileInput" style="display: none;" onchange="handleOtherUpload(event)">
+                </div>
+                
+                <div id="otherUploadPreview" style="display: none; text-align: center;">
+                    <img id="otherPreviewImg" style="max-width: 100%; border-radius: 15px; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.1); display: none;">
+                    <video id="otherPreviewVideo" controls style="max-width: 100%; border-radius: 15px; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.1); display: none;"></video>
+                    <audio id="otherPreviewAudio" controls style="width: 100%; margin: 20px 0; display: none;" class="audio-player"></audio>
+                    
+                    <input type="text" id="otherCaptionInput" placeholder="📝 Добавьте описание..." style="width: 100%; padding: 15px; margin: 15px 0; border: 2px solid var(--primary); border-radius: 12px; font-size: 1rem;">
+                    <button onclick="publishOtherContent()" style="width: 100%; max-width: 300px;">🚀 Опубликовать</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="account" class="content-section">
+            <div class="auth-panel">
+                <div id="loginForm" class="auth-form active">
+                    <h3 style="margin-bottom: 20px; color: var(--dark);">🔐 Вход в МЕМПОЛИС</h3>
+                    <input type="text" class="auth-input" id="loginUsername" placeholder="👤 Имя пользователя">
+                    <input type="password" class="auth-input" id="loginPassword" placeholder="🔒 Пароль">
+                    <button onclick="login()" style="width: 100%; max-width: 300px; margin-top: 15px;">Войти</button>
+                    <p style="margin-top: 20px;">Нет аккаунта? <a href="#" onclick="showRegisterForm()" style="color: var(--primary); font-weight: 600;">Зарегистрироваться</a></p>
+                </div>
+                
+                <div id="registerForm" class="auth-form">
+                    <h3 style="margin-bottom: 20px; color: var(--dark);">🚀 Регистрация</h3>
+                    <input type="text" class="auth-input" id="registerUsername" placeholder="👤 Имя пользователя">
+                    <input type="email" class="auth-input" id="registerEmail" placeholder="📧 Email">
+                    <input type="password" class="auth-input" id="registerPassword" placeholder="🔒 Пароль">
+                    <button onclick="register()" style="width: 100%; max-width: 300px; margin-top: 15px;">Зарегистрироваться</button>
+                    <p style="margin-top: 20px;">Уже есть аккаунт? <a href="#" onclick="showLoginForm()" style="color: var(--primary); font-weight: 600;">Войти</a></p>
+                </div>
+                
+                <div id="userInfo" class="user-info">
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem; position: relative;">
+                        <span>👤</span>
+                        <div class="badge" id="userBadge" style="position: absolute; bottom: -5px; right: -5px; background: gold; color: #000; border-radius: 10px; padding: 3px 8px; font-size: 0.7rem; font-weight: bold;">USER</div>
+                    </div>
+                    <h3 id="userGreeting" style="margin-bottom: 15px; color: var(--dark);">Добро пожаловать!</h3>
+                    <button onclick="logout()" style="background: var(--accent); width: 100%; max-width: 200px;">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('mempolis_users')) || [];
+        let memes = JSON.parse(localStorage.getItem('mempolis_memes')) || [];
+        let videos = JSON.parse(localStorage.getItem('mempolis_videos')) || [];
+        let audios = JSON.parse(localStorage.getItem('mempolis_audios')) || [];
+        let feedItems = JSON.parse(localStorage.getItem('mempolis_feed')) || [];
+        let currentContentType = 'video';
+        let currentUploadTab = 'meme';
+        let currentFile = null;
+        let currentFeedIndex = 0;
+        let soundsEnabled = true;
+
+        const defaultMemes = [
+            {
+                id: 1,
+                image: "https://i.imgflip.com/30b1gx.jpg",
+                caption: "Два штата - вечная классика! 🤣",
+                likes: 142,
+                comments: 23,
+                type: 'meme'
+            },
+            {
+                id: 2,
+                image: "https://i.imgflip.com/1g8my4.jpg",
+                caption: "Когда показываешь мем другу 😎",
+                likes: 98,
+                comments: 15,
+                type: 'meme'
+            },
+            {
+                id: 3,
+                image: "https://i.imgflip.com/1bij.jpg",
+                caption: "Ожидание vs Реальность 🎭",
+                likes: 256,
+                comments: 42,
+                type: 'meme'
+            },
+            {
+                id: 999,
+                image: "https://i.imgflip.com/30b1gx.jpg",
+                caption: "БОБРИХА 303! 🦫 Легенда МЕМПОЛИСА! Когда заходишь на сервер и все сразу узнают тебя 👑",
+                likes: 999,
+                comments: 99,
+                type: 'meme',
+                special: true
+            }
+        ];
+
+        function showNotification(message, type = 'normal') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-20px';
+                confetti.style.opacity = '1';
+                
+                document.body.appendChild(confetti);
+                
+                const duration = Math.random() * 3000 + 2000;
+                const start = Date.now();
+                
+                function animate() {
+                    const elapsed = Date.now() - start;
+                    const progress = elapsed / duration;
+                    
+                    if (progress < 1) {
+                        const y = progress * (window.innerHeight + 100);
+                        const x = Math.sin(progress * Math.PI * 2) * 100;
+                        const rotation = progress * 360;
+                        
+                        confetti.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+                        confetti.style.opacity = (1 - progress).toString();
+                        
+                        requestAnimationFrame(animate);
+                    } else {
+                        confetti.remove();
+                    }
+                }
+                
+                animate();
+            }
+        }
+
+        function switchSection(sectionName) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                document.getElementById(sectionName).classList.add('active');
+                event.target.classList.add('active');
+                
+                if (sectionName === 'memes') loadMemes();
+                if (sectionName === 'videos') loadVideos();
+                if (sectionName === 'audio') loadAudios();
+                if (sectionName === 'feed') loadFeed();
+            }, 50);
+        }
+
+        function switchUploadTab(tabName) {
+            currentUploadTab = tabName;
+            
+            document.querySelectorAll('.upload-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.upload-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Upload').style.display = 'block';
+            
+            document.getElementById(tabName + 'UploadPreview').style.display = 'none';
+        }
+
+        function selectContentType(type) {
+            currentContentType = type;
+            
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const uploadIcon = document.getElementById('otherUploadIcon');
+            const uploadText = document.getElementById('otherUploadText');
+            const uploadSubtext = document.getElementById('otherUploadSubtext');
+            
+            switch(type) {
+                case 'video':
+                    uploadIcon.textContent = '🎬';
+                    uploadText.textContent = 'Загрузить видео';
+                    uploadSubtext.textContent = 'MP4, WEBM, MOV';
+                    break;
+                case 'audio':
+                    uploadIcon.textContent = '🎵';
+                    uploadText.textContent = 'Загрузить аудио';
+                    uploadSubtext.textContent = 'MP3, WAV, OGG';
+                    break;
+                case 'feed':
+                    uploadIcon.textContent = '📱';
+                    uploadText.textContent = 'Загрузить в ленту';
+                    uploadSubtext.textContent = 'MP4 (вертикальное)';
+                    break;
+                case 'photo':
+                    uploadIcon.textContent = '🖼️';
+                    uploadText.textContent = 'Загрузить фото';
+                    uploadSubtext.textContent = 'JPG, PNG, GIF';
+                    break;
+            }
+        }
+
+        function handleMemeUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showNotification('❌ Выберите изображение!', 'error');
+                return;
+            }
+            
+            currentFile = file;
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                document.getElementById('memePreviewImg').src = e.target.result;
+                document.getElementById('memeUploadPreview').style.display = 'block';
+                document.getElementById('memeCaptionInput').value = '';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function handleOtherUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Проверка типа файла
+            if (currentContentType === 'audio' && !file.type.startsWith('audio/')) {
+                showNotification('❌ Выберите аудио файл!', 'error');
+                return;
+            }
+            if (currentContentType === 'video' && !file.type.startsWith('video/')) {
+                showNotification('❌ Выберите видео файл!', 'error');
+                return;
+            }
+            if (currentContentType === 'photo' && !file.type.startsWith('image/')) {
+                showNotification('❌ Выберите изображение!', 'error');
+                return;
+            }
+            
+            currentFile = file;
+            const reader = new FileReader();
+            
+            document.getElementById('otherPreviewImg').style.display = 'none';
+            document.getElementById('otherPreviewVideo').style.display = 'none';
+            document.getElementById('otherPreviewAudio').style.display = 'none';
+            
+            reader.onload = function(e) {
+                if (currentContentType === 'photo') {
+                    document.getElementById('otherPreviewImg').src = e.target.result;
+                    document.getElementById('otherPreviewImg').style.display = 'block';
+                } else if (currentContentType === 'video' || currentContentType === 'feed') {
+                    document.getElementById('otherPreviewVideo').src = e.target.result;
+                    document.getElementById('otherPreviewVideo').style.display = 'block';
+                } else if (currentContentType === 'audio') {
+                    document.getElementById('otherPreviewAudio').src = e.target.result;
+                    document.getElementById('otherPreviewAudio').style.display = 'block';
+                }
+                
+                document.getElementById('otherUploadPreview').style.display = 'block';
+                document.getElementById('otherCaptionInput').value = '';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function publishMeme() {
+            if (!currentFile) {
+                showNotification('❌ Сначала выберите файл!', 'error');
+                return;
+            }
+            
+            const caption = document.getElementById('memeCaptionInput').value || 'Без описания';
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const newMeme = {
+                    id: Date.now(),
+                    image: e.target.result,
+                    caption: caption,
+                    likes: 0,
+                    comments: 0,
+                    type: 'meme',
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                memes.push(newMeme);
+                localStorage.setItem('mempolis_memes', JSON.stringify(memes));
+                
+                showNotification('✅ Мем успешно опубликован!');
+                loadMemes();
+                
+                document.getElementById('memeUploadPreview').style.display = 'none';
+                document.getElementById('memeFileInput').value = '';
+                currentFile = null;
+                
+                updateStats();
+            };
+            
+            reader.readAsDataURL(currentFile);
+        }
+
+        function publishOtherContent() {
+            if (!currentFile) {
+                showNotification('❌ Сначала выберите файл!', 'error');
+                return;
+            }
+            
+            const caption = document.getElementById('otherCaptionInput').value || 'Без описания';
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const newItem = {
+                    id: Date.now(),
+                    url: e.target.result,
+                    caption: caption,
+                    likes: 0,
+                    comments: 0,
+                    type: currentContentType,
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                if (currentContentType === 'video') {
+                    videos.push(newItem);
+                    localStorage.setItem('mempolis_videos', JSON.stringify(videos));
+                    showNotification('✅ Видео успешно опубликовано!');
+                    loadVideos();
+                } else if (currentContentType === 'audio') {
+                    audios.push(newItem);
+                    localStorage.setItem('mempolis_audios', JSON.stringify(audios));
+                    showNotification('✅ Аудио успешно опубликовано!');
+                    loadAudios();
+                } else if (currentContentType === 'feed') {
+                    feedItems.push(newItem);
+                    localStorage.setItem('mempolis_feed', JSON.stringify(feedItems));
+                    showNotification('✅ Видео добавлено в ленту!');
+                    loadFeed();
+                } else if (currentContentType === 'photo') {
+                    newItem.image = newItem.url;
+                    memes.push(newItem);
+                    localStorage.setItem('mempolis_memes', JSON.stringify(memes));
+                    showNotification('✅ Фото успешно опубликовано!');
+                    loadMemes();
+                }
+                
+                document.getElementById('otherUploadPreview').style.display = 'none';
+                document.getElementById('otherFileInput').value = '';
+                currentFile = null;
+                
+                updateStats();
+            };
+            
+            reader.readAsDataURL(currentFile);
+        }
+
+        function loadMemes() {
+            const container = document.getElementById('memeContainer');
+            container.innerHTML = '';
+            
+            const allMemes = [...defaultMemes, ...memes];
+            
+            allMemes.forEach(meme => {
+                const memeCard = document.createElement('div');
+                memeCard.className = `meme-card ${meme.special ? 'special-meme' : ''}`;
+                memeCard.innerHTML = `
+                    <img src="${meme.image}" alt="Мем" class="meme-img"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNmZjZiNmIiLz48dGV4dCB4PSIxNTAiIHk9IjEwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMTYiPk3QtdC80Ywg0LzQtdC90Y88L3RleHQ+PC9zdmc+'">
+                    <div class="meme-caption">${meme.caption}</div>
+                    <div class="meme-reactions">
+                        <div class="reaction" onclick="likeItem('memes', ${meme.id})">❤️ ${meme.likes}</div>
+                        <div class="reaction" onclick="shareItem('memes', ${meme.id})">↗️ Поделиться</div>
+                    </div>
+                `;
+                container.appendChild(memeCard);
+            });
+            
+            document.getElementById('totalMemes').textContent = allMemes.length;
+        }
+
+        function loadVideos() {
+            const container = document.getElementById('videoContainer');
+            container.innerHTML = '';
+            
+            if (videos.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666; font-size: 1.1rem;">🎬 Пока нет видео. Загрузите первое!</p>';
+                return;
+            }
+            
+            videos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'meme-card';
+                videoCard.innerHTML = `
+                    <video controls class="meme-img" style="background: #000;">
+                        <source src="${video.url}" type="video/mp4">
+                    </video>
+                    <div class="meme-caption">${video.caption}</div>
+                    <div class="meme-reactions">
+                        <div class="reaction" onclick="likeItem('videos', ${video.id})">❤️ ${video.likes}</div>
+                        <div class="reaction" onclick="shareItem('videos', ${video.id})">↗️ Поделиться</div>
+                    </div>
+                `;
+                container.appendChild(videoCard);
+            });
+        }
+
+        function loadAudios() {
+            const container = document.getElementById('audioContainer');
+            container.innerHTML = '';
+            
+            if (audios.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666; font-size: 1.1rem;">🎵 Пока нет аудио. Загрузите первое!</p>';
+                return;
+            }
+            
+            audios.forEach(audio => {
+                const audioCard = document.createElement('div');
+                audioCard.className = 'meme-card';
+                audioCard.style.padding = '20px';
+                audioCard.innerHTML = `
+                    <audio controls class="audio-player">
+                        <source src="${audio.url}" type="audio/mp3">
+                    </audio>
+                    <div class="meme-caption">${audio.caption}</div>
+                    <div class="meme-reactions">
+                        <div class="reaction" onclick="likeItem('audios', ${audio.id})">❤️ ${audio.likes}</div>
+                        <div class="reaction" onclick="shareItem('audios', ${audio.id})">↗️ Поделиться</div>
+                    </div>
+                `;
+                container.appendChild(audioCard);
+            });
+        }
+
+        function loadFeed() {
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = '';
+            
+            if (feedItems.length === 0) {
+                container.innerHTML = `
+                    <div style="color: white; text-align: center; padding-top: 200px;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.5rem;">Лента пуста</h3>
+                        <p>Загрузите первое видео в ленту!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            feedItems.forEach((item, index) => {
+                const feedItem = document.createElement('div');
+                feedItem.className = `feed-item ${index === 0 ? 'active' : ''}`;
+                feedItem.innerHTML = `
+                    <video class="feed-video" controls>
+                        <source src="${item.url}" type="video/mp4">
+                    </video>
+                    <div class="feed-controls">
+                        <button class="feed-btn" onclick="likeItem('feed', ${item.id})">❤️<br><small>${item.likes}</small></button>
+                        <button class="feed-btn" onclick="shareItem('feed', ${item.id})">↗️<br><small>Поделиться</small></button>
+                    </div>
+                    <div class="feed-info">
+                        <h3 style="margin-bottom: 5px;">${item.caption}</h3>
+                        <p style="font-size: 0.9rem; opacity: 0.8;">${item.timestamp}</p>
+                    </div>
+                `;
+                container.appendChild(feedItem);
+            });
+            
+            currentFeedIndex = 0;
+        }
+
+        function nextFeedItem() {
+            if (feedItems.length === 0) return;
+            
+            const items = document.querySelectorAll('.feed-item');
+            items[currentFeedIndex].classList.remove('active');
+            
+            currentFeedIndex = (currentFeedIndex + 1) % items.length;
+            items[currentFeedIndex].classList.add('active');
+        }
+
+        function prevFeedItem() {
+            if (feedItems.length === 0) return;
+            
+            const items = document.querySelectorAll('.feed-item');
+            items[currentFeedIndex].classList.remove('active');
+            
+            currentFeedIndex = (currentFeedIndex - 1 + items.length) % items.length;
+            items[currentFeedIndex].classList.add('active');
+        }
+
+        function likeItem(type, id) {
+            let items, storageKey;
+            
+            switch(type) {
+                case 'memes':
+                    items = [...defaultMemes, ...memes];
+                    storageKey = 'mempolis_memes';
+                    break;
+                case 'videos':
+                    items = videos;
+                    storageKey = 'mempolis_videos';
+                    break;
+                case 'audios':
+                    items = audios;
+                    storageKey = 'mempolis_audios';
+                    break;
+                case 'feed':
+                    items = feedItems;
+                    storageKey = 'mempolis_feed';
+                    break;
+            }
+            
+            const item = items.find(item => item.id === id);
+            if (item) {
+                item.likes = (item.likes || 0) + 1;
+                
+                if (type === 'memes') {
+                    const userMemes = items.filter(item => !defaultMemes.find(dm => dm.id === item.id));
+                    localStorage.setItem(storageKey, JSON.stringify(userMemes));
+                } else {
+                    localStorage.setItem(storageKey, JSON.stringify(items));
+                }
+                
+                switch(type) {
+                    case 'memes': loadMemes(); break;
+                    case 'videos': loadVideos(); break;
+                    case 'audios': loadAudios(); break;
+                    case 'feed': loadFeed(); break;
+                }
+                
+                showNotification('❤️ Лайк добавлен!');
+            }
+        }
+
+        function shareItem(type, id) {
+            const baseUrl = window.location.href.split('?')[0];
+            const shareUrl = `${baseUrl}?share=${type}_${id}`;
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showNotification('📋 Ссылка скопирована в буфер обмена!');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = shareUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('📋 Ссылка скопирована!');
+            });
+        }
+
+        function addRandomMeme() {
+            const randomMemes = [
+                { image: 'https://i.imgflip.com/1bij.jpg', caption: 'Ожидание vs Реальность 🎭' },
+                { image: 'https://i.imgflip.com/261o3j.jpg', caption: 'Моё лицо когда... 🤔' },
+                { image: 'https://i.imgflip.com/1otk96.jpg', caption: 'Программисты понимают 💻' }
+            ];
+            
+            const randomMeme = randomMemes[Math.floor(Math.random() * randomMemes.length)];
+            const newMeme = {
+                id: Date.now(),
+                image: randomMeme.image,
+                caption: randomMeme.caption,
+                likes: Math.floor(Math.random() * 100) + 50,
+                comments: Math.floor(Math.random() * 20) + 5,
+                type: 'meme'
+            };
+            
+            memes.push(newMeme);
+            localStorage.setItem('mempolis_memes', JSON.stringify(memes));
+            loadMemes();
+            showNotification('🎲 Новый мем добавлен!');
+            updateStats();
+        }
+
+        function showSurprise() {
+            createConfetti();
+            showNotification('🎉 СЮРПРИЗ! Ты лучший! 🎊', 'warning');
+            
+            document.getElementById('onlineUsers').textContent = Math.floor(Math.random() * 200) + 800;
+            document.getElementById('todayViews').textContent = (Math.floor(Math.random() * 10) + 2) + '.' + Math.floor(Math.random() * 10) + 'k';
+        }
+
+        function showSpecialMemes() {
+            const specialMemes = [
+                {
+                    id: 9999,
+                    image: "https://i.imgflip.com/30b1gx.jpg",
+                    caption: "🌟 ОСОБЫЙ МЕМ: Ты особенный пользователь!",
+                    likes: 777,
+                    comments: 88,
+                    special: true
+                }
+            ];
+            
+            const container = document.getElementById('memeContainer');
+            container.innerHTML = '';
+            
+            specialMemes.forEach(meme => {
+                const memeCard = document.createElement('div');
+                memeCard.className = 'meme-card special-meme';
+                memeCard.innerHTML = `
+                    <img src="${meme.image}" alt="Особый мем" class="meme-img"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9ImdvbGQiLz48dGV4dCB4PSIxNTAiIHk9IjEwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyIgZm9udC1zaXplPSIxNiI+0J7RgdC90L7QstCw0L3QuNC1INC80LXQvNC1PC90ZXh0Pjwvc3ZnPg=='">
+                    <div class="meme-caption">${meme.caption}</div>
+                    <div class="meme-reactions">
+                        <div class="reaction">❤️ ${meme.likes}</div>
+                        <div class="reaction">💬 ${meme.comments}</div>
+                        <div class="reaction">⭐ Особый</div>
+                    </div>
+                `;
+                container.appendChild(memeCard);
+            });
+            
+            showNotification('⭐ Показаны особые мемы!', 'warning');
+        }
+
+        function toggleSound() {
+            soundsEnabled = !soundsEnabled;
+            const button = document.querySelector('button.warning');
+            button.textContent = soundsEnabled ? '🔊 Звук: Вкл' : '🔇 Звук: Выкл';
+            showNotification(soundsEnabled ? '🔊 Звук включен' : '🔇 Звук выключен');
+        }
+
+        function updateStats() {
+            const totalMemes = [...defaultMemes, ...memes].length;
+            document.getElementById('totalMemes').textContent = totalMemes;
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        function showUserInfo() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+        }
+
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            if (username && email && password) {
+                const newUser = {
+                    id: Date.now(),
+                    username: username,
+                    email: email,
+                    password: password,
+                    joinDate: new Date().toLocaleDateString('ru-RU')
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('mempolis_users', JSON.stringify(users));
+                
+                showNotification('✅ Регистрация успешна!');
+                showLoginForm();
+            } else {
+                showNotification('❌ Заполните все поля!', 'error');
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('userGreeting').textContent = `Привет, ${user.username}!`;
+                
+                const badge = document.getElementById('userBadge');
+                if (user.username.toLowerCase() === 'gordey25690') {
+                    badge.textContent = 'ВЛАДЕЛЕЦ';
+                    badge.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+                } else if (user.username.toLowerCase() === 'bobriha3o3') {
+                    badge.textContent = 'ЛЕГЕНДА';
+                    badge.style.background = 'linear-gradient(45deg, #E1306C, #F77737)';
+                    badge.style.color = 'white';
+                }
+                
+                showUserInfo();
+                showNotification(`🎉 Добро пожаловать, ${user.username}!`);
+            } else {
+                showNotification('❌ Неверное имя пользователя или пароль!', 'error');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            showLoginForm();
+            showNotification('👋 Вы вышли из системы');
+        }
+
+        window.onload = function() {
+            loadMemes();
+            loadVideos();
+            loadAudios();
+            loadFeed();
+            updateStats();
+            
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('userGreeting').textContent = `С возвращением, ${currentUser.username}!`;
+                showUserInfo();
+            }
+            
+            showNotification('🎉 Добро пожаловать в МЕМПОЛИС 3.0!');
+        };
+    </script>
+</body>
+</html>
