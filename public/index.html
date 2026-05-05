@@ -2,17 +2,17 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МЕМПОЛИС 4.0 - Социальная сеть мемов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>МЕМПОЛИС 4.0 — Социальная сеть мемов</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
-        
+
         :root {
             --primary: #667eea;
             --secondary: #764ba2;
@@ -21,11 +21,12 @@
             --dark: #2c3e50;
             --light: #ecf0f1;
         }
-        
+
         body {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
             padding: 10px;
+            padding-bottom: 90px; /* Место для фиксированного плеера */
         }
 
         .container {
@@ -114,6 +115,7 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            cursor: pointer;
         }
 
         .meme-card:hover {
@@ -124,11 +126,13 @@
             width: 100%;
             height: 250px;
             object-fit: cover;
+            background: #000;
         }
 
         .meme-caption {
             padding: 15px;
             font-weight: 600;
+            word-break: break-word;
         }
 
         .meme-actions {
@@ -143,6 +147,7 @@
             padding: 8px 15px;
             border-radius: 20px;
             transition: all 0.3s;
+            user-select: none;
         }
 
         .action-btn:hover {
@@ -219,15 +224,65 @@
             padding: 20px;
         }
 
-        .online-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: green;
-            margin-right: 5px;
+        /* Фиксированный аудиоплеер */
+        .fixed-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 999;
+            border-top: 1px solid #444;
+            transform: translateY(100%);
+            transition: transform 0.3s;
         }
-
+        
+        .fixed-player.show {
+            transform: translateY(0);
+        }
+        
+        .player-info {
+            flex: 1;
+            color: white;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .player-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .player-close {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .single-meme-view {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -235,150 +290,79 @@
             .menu {
                 grid-template-columns: repeat(3, 1fr);
             }
+            .meme-card img, .meme-card video {
+                height: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎭 МЕМПОЛИС 4.0</h1>
-            <p>Социальная сеть мемов с реальной синхронизацией</p>
-        </header>
-
-        <div class="menu">
-            <div class="menu-item" onclick="switchSection('memes')">📷 Мемы</div>
-            <div class="menu-item" onclick="switchSection('videos')">🎬 Видео</div>
-            <div class="menu-item" onclick="switchSection('audios')">🎵 Музыка</div>
-            <div class="menu-item" onclick="switchSection('feed')">📱 Лента</div>
-            <div class="menu-item" onclick="switchSection('upload')">📤 Загрузить</div>
-            <div class="menu-item" onclick="switchSection('users')">👥 Пользователи</div>
-            <div class="menu-item" onclick="switchSection('profile')">👤 Профиль</div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value" id="totalMemes">0</div>
-                <div>Мемов</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalUsers">0</div>
-                <div>Пользователей</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="onlineCount">1</div>
-                <div>Онлайн</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="myRating">0</div>
-                <div>Мой рейтинг</div>
-            </div>
-        </div>
-
-        <div id="memes" class="content-section active">
-            <h2 style="margin-bottom: 20px;">🔥 Популярные мемы</h2>
-            <div class="meme-grid" id="memesContainer"></div>
-        </div>
-
-        <div id="videos" class="content-section">
-            <h2 style="margin-bottom: 20px;">🎬 Видео мемы</h2>
-            <div class="meme-grid" id="videosContainer"></div>
-        </div>
-
-        <div id="audios" class="content-section">
-            <h2 style="margin-bottom: 20px;">🎵 Мемная музыка</h2>
-            <div class="meme-grid" id="audiosContainer"></div>
-        </div>
-
-        <div id="feed" class="content-section">
-            <h2 style="margin-bottom: 20px;">📱 Лента</h2>
-            <div class="meme-grid" id="feedContainer"></div>
-        </div>
-
-        <div id="upload" class="content-section">
-            <h2 style="margin-bottom: 20px;">📤 Загрузить контент</h2>
-            <select id="contentType" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 10px;">
-                <option value="meme">📷 Мем (изображение)</option>
-                <option value="video">🎬 Видео</option>
-                <option value="audio">🎵 Аудио</option>
-                <option value="feed">📱 Видео в ленту</option>
-            </select>
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <div style="font-size: 3rem;">📤</div>
-                <div>Нажмите для выбора файла</div>
-                <input type="file" id="fileInput" style="display: none;" accept="image/*,video/*,audio/*">
-            </div>
-            <input type="text" id="captionInput" placeholder="Введите описание..." style="width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 2px solid #ddd;">
-            <button onclick="uploadContent()" style="width: 100%;">🚀 Опубликовать</button>
-        </div>
-
-        <div id="users" class="content-section">
-            <h2 style="margin-bottom: 20px;">👥 Пользователи</h2>
-            <div class="meme-grid" id="usersContainer"></div>
-        </div>
-
-        <div id="profile" class="content-section">
-            <div id="authSection">
-                <div id="loginForm" class="auth-form">
-                    <h3 style="text-align: center; margin-bottom: 20px;">🔐 Вход в МЕМПОЛИС</h3>
-                    <input type="text" id="loginUsername" class="auth-input" placeholder="Имя пользователя">
-                    <input type="password" id="loginPassword" class="auth-input" placeholder="Пароль">
-                    <button onclick="login()" style="width: 100%;">Войти</button>
-                    <p style="text-align: center; margin-top: 15px;">Нет аккаунта? <a href="#" onclick="showRegister()">Зарегистрироваться</a></p>
-                </div>
-                <div id="registerForm" class="auth-form" style="display: none;">
-                    <h3 style="text-align: center; margin-bottom: 20px;">🚀 Регистрация</h3>
-                    <input type="text" id="regUsername" class="auth-input" placeholder="Имя пользователя">
-                    <input type="email" id="regEmail" class="auth-input" placeholder="Email">
-                    <input type="password" id="regPassword" class="auth-input" placeholder="Пароль">
-                    <button onclick="register()" style="width: 100%;">Зарегистрироваться</button>
-                    <p style="text-align: center; margin-top: 15px;">Уже есть аккаунт? <a href="#" onclick="showLogin()">Войти</a></p>
-                </div>
-            </div>
-            <div id="profileInfo" style="display: none;">
-                <div class="user-info">
-                    <div style="width: 100px; height: 100px; background: var(--primary); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">👤</div>
-                    <h2 id="profileUsername"></h2>
-                    <p>📅 Присоединился: <span id="profileJoinDate"></span></p>
-                    <p>⭐ Рейтинг: <span id="profileRating"></span></p>
-                    <p>👥 Подписчиков: <span id="profileSubscribers"></span></p>
-                    <p>📢 Подписок: <span id="profileSubscriptions"></span></p>
-                    <button onclick="logout()" style="margin-top: 20px; background: var(--accent);">Выйти</button>
-                </div>
-            </div>
+    <div class="container" id="appRoot">
+        <!-- Динамическое содержимое будет здесь -->
+    </div>
+    
+    <!-- Фиксированный плеер -->
+    <div class="fixed-player" id="audioPlayer">
+        <div class="player-info" id="playerInfo">Нет трека</div>
+        <div class="player-controls">
+            <button id="playPauseBtn">⏸️</button>
+            <button id="closePlayerBtn">❌</button>
         </div>
     </div>
 
     <script>
+        // --- Глобальные переменные ---
         let socket = io();
         let currentUser = null;
         let onlineUsers = new Set();
-
-        // Socket события
-        socket.on('connect', () => {
-            console.log('Подключено к серверу');
-            if (currentUser) {
-                socket.emit('user_online', currentUser.id);
+        let currentPlayingAudio = null;
+        let currentAudioId = null;
+        
+        // --- DOM элементы ---
+        const appRoot = document.getElementById('appRoot');
+        const audioPlayerDiv = document.getElementById('audioPlayer');
+        const playerInfoSpan = document.getElementById('playerInfo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const closePlayerBtn = document.getElementById('closePlayerBtn');
+        
+        let audioElement = null;
+        
+        // --- Инициализация плеера ---
+        function initPlayer() {
+            if (!audioElement) {
+                audioElement = new Audio();
+                audioElement.addEventListener('play', () => playPauseBtn.textContent = '⏸️');
+                audioElement.addEventListener('pause', () => playPauseBtn.textContent = '▶️');
+                audioElement.addEventListener('ended', () => {
+                    audioPlayerDiv.classList.remove('show');
+                    currentPlayingAudio = null;
+                    currentAudioId = null;
+                });
             }
-        });
-
-        socket.on('user_status', (data) => {
-            if (data.status === 'online') {
-                onlineUsers.add(data.userId);
-            } else {
-                onlineUsers.delete(data.userId);
-            }
-            document.getElementById('onlineCount').textContent = onlineUsers.size + 1;
-        });
-
-        socket.on('new_content', (data) => {
-            showNotification('Новый контент добавлен!', 'success');
-            loadContent();
-        });
-
-        socket.on('like_updated', (data) => {
-            loadContent();
-        });
-
+            
+            playPauseBtn.onclick = () => {
+                if (audioElement.paused) audioElement.play();
+                else audioElement.pause();
+            };
+            
+            closePlayerBtn.onclick = () => {
+                audioElement.pause();
+                audioPlayerDiv.classList.remove('show');
+                currentPlayingAudio = null;
+                currentAudioId = null;
+            };
+        }
+        
+        function playAudio(url, title) {
+            if (!audioElement) initPlayer();
+            audioElement.src = url;
+            audioElement.play();
+            playerInfoSpan.textContent = title || 'Аудио';
+            audioPlayerDiv.classList.add('show');
+            currentPlayingAudio = { url, title };
+        }
+        
+        // --- Вспомогательные функции ---
         function showNotification(msg, type = 'normal') {
             const notif = document.createElement('div');
             notif.className = `notification ${type === 'error' ? 'error' : ''}`;
@@ -390,229 +374,415 @@
                 setTimeout(() => notif.remove(), 300);
             }, 3000);
         }
-
+        
+        function formatDate(isoString) {
+            if (!isoString) return 'недавно';
+            return new Date(isoString).toLocaleDateString();
+        }
+        
+        // --- API вызовы ---
+        async function apiRequest(url, options = {}) {
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options
+                });
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || 'Ошибка запроса');
+                }
+                return await res.json();
+            } catch (e) {
+                showNotification(e.message, 'error');
+                throw e;
+            }
+        }
+        
+        // --- Отрисовка главного интерфейса ---
+        async function renderMainApp() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const memeId = urlParams.get('meme');
+            
+            if (memeId && !isNaN(memeId)) {
+                try {
+                    const meme = await apiRequest(`/api/meme/${memeId}`);
+                    renderSingleMeme(meme);
+                } catch(e) {
+                    renderHome();
+                }
+                return;
+            }
+            renderHome();
+        }
+        
+        function renderHome() {
+            appRoot.innerHTML = `
+                <header>
+                    <h1>🎭 МЕМПОЛИС 4.0</h1>
+                    <p>Социальная сеть мемов с реальной синхронизацией</p>
+                </header>
+                <div class="menu">
+                    <div class="menu-item" data-section="memes">📷 Мемы</div>
+                    <div class="menu-item" data-section="videos">🎬 Видео</div>
+                    <div class="menu-item" data-section="audios">🎵 Музыка</div>
+                    <div class="menu-item" data-section="feed">📱 Лента</div>
+                    <div class="menu-item" data-section="upload">📤 Загрузить</div>
+                    <div class="menu-item" data-section="users">👥 Пользователи</div>
+                    <div class="menu-item" data-section="profile">👤 Профиль</div>
+                </div>
+                <div class="stats">
+                    <div class="stat-item"><div class="stat-value" id="totalMemes">0</div><div>Мемов</div></div>
+                    <div class="stat-item"><div class="stat-value" id="totalUsers">0</div><div>Пользователей</div></div>
+                    <div class="stat-item"><div class="stat-value" id="onlineCount">1</div><div>Онлайн</div></div>
+                    <div class="stat-item"><div class="stat-value" id="myRating">0</div><div>Мой рейтинг</div></div>
+                </div>
+                <div id="memes" class="content-section active"><div class="meme-grid" id="memesContainer">Загрузка...</div></div>
+                <div id="videos" class="content-section"><div class="meme-grid" id="videosContainer"></div></div>
+                <div id="audios" class="content-section"><div class="meme-grid" id="audiosContainer"></div></div>
+                <div id="feed" class="content-section"><div class="meme-grid" id="feedContainer"></div></div>
+                <div id="upload" class="content-section"><div id="uploadForm"></div></div>
+                <div id="users" class="content-section"><div class="meme-grid" id="usersContainer"></div></div>
+                <div id="profile" class="content-section"><div id="profileContainer"></div></div>
+            `;
+            
+            // Подписка на клики по меню
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', () => switchSection(item.dataset.section));
+            });
+            
+            // Загрузка данных
+            loadContent();
+            loadUsers();
+            updateStats();
+            loadProfileUI();
+            
+            // Обработка сокетов для обновлений
+            socket.on('new_content', () => { loadContent(); });
+            socket.on('like_updated', () => { loadContent(); });
+            socket.on('user_status', (data) => {
+                if (data.status === 'online') onlineUsers.add(data.userId);
+                else onlineUsers.delete(data.userId);
+                document.getElementById('onlineCount').textContent = onlineUsers.size + 1;
+            });
+            if (currentUser) socket.emit('user_online', currentUser.id);
+        }
+        
         function switchSection(section) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(section).classList.add('active');
-            if (section !== 'upload' && section !== 'profile') loadContent();
+            if (section === 'upload') renderUploadForm();
+            if (section === 'profile') loadProfileUI();
             if (section === 'users') loadUsers();
         }
-
+        
         async function loadContent() {
-            await Promise.all([
-                fetch('/api/memes').then(r => r.json()).then(renderMemes),
-                fetch('/api/videos').then(r => r.json()).then(renderVideos),
-                fetch('/api/audios').then(r => r.json()).then(renderAudios),
-                fetch('/api/feed').then(r => r.json()).then(renderFeed)
-            ]);
-            document.getElementById('totalMemes').textContent = document.querySelectorAll('#memesContainer .meme-card').length;
+            try {
+                const [memes, videos, audios, feed] = await Promise.all([
+                    apiRequest('/api/memes'),
+                    apiRequest('/api/videos'),
+                    apiRequest('/api/audios'),
+                    apiRequest('/api/feed')
+                ]);
+                renderMemes(memes);
+                renderVideos(videos);
+                renderAudios(audios);
+                renderFeed(feed);
+                document.getElementById('totalMemes').textContent = memes.length;
+            } catch(e) {}
         }
-
+        
         function renderMemes(memes) {
             const container = document.getElementById('memesContainer');
+            if (!container) return;
+            if (!memes.length) { container.innerHTML = '<p>Мемов пока нет. Загрузите первый!</p>'; return; }
             container.innerHTML = memes.map(meme => `
-                <div class="meme-card">
-                    <img src="${meme.url}" alt="мем" onerror="this.src='https://via.placeholder.com/300x200?text=Мем'">
-                    <div class="meme-caption">${meme.caption || 'Без описания'}</div>
+                <div class="meme-card" onclick="window.location.href='/?meme=${meme.id}'">
+                    ${meme.is_animated ? 
+                        `<video src="${meme.url}" controls onclick="event.stopPropagation()"></video>` : 
+                        `<img src="${meme.url}" alt="мем" onerror="this.src='https://via.placeholder.com/300x200?text=Ошибка'">`}
+                    <div class="meme-caption">${escapeHtml(meme.caption || 'Без описания')}</div>
                     <div class="meme-actions">
-                        <div class="action-btn" onclick="likeContent('meme', ${meme.id})">❤️ ${meme.likes || 0}</div>
-                        <div class="action-btn">👤 ${meme.username || 'anon'}</div>
+                        <div class="action-btn" onclick="event.stopPropagation(); likeContent('meme', ${meme.id})">❤️ ${meme.likes || 0}</div>
+                        <div class="action-btn">👤 ${escapeHtml(meme.username || 'anon')}</div>
                     </div>
                 </div>
             `).join('');
         }
-
+        
         function renderVideos(videos) {
             const container = document.getElementById('videosContainer');
+            if (!container) return;
+            if (!videos.length) { container.innerHTML = '<p>Видео пока нет.</p>'; return; }
             container.innerHTML = videos.map(video => `
                 <div class="meme-card">
-                    <video controls><source src="${video.url}" type="video/mp4"></video>
-                    <div class="meme-caption">${video.caption || 'Без описания'}</div>
+                    <video controls src="${video.url}"></video>
+                    <div class="meme-caption">${escapeHtml(video.caption || 'Без описания')}</div>
                     <div class="meme-actions">
                         <div class="action-btn" onclick="likeContent('video', ${video.id})">❤️ ${video.likes || 0}</div>
-                        <div class="action-btn">👤 ${video.username || 'anon'}</div>
+                        <div class="action-btn">👤 ${escapeHtml(video.username || 'anon')}</div>
                     </div>
                 </div>
             `).join('');
         }
-
+        
         function renderAudios(audios) {
             const container = document.getElementById('audiosContainer');
+            if (!container) return;
+            if (!audios.length) { container.innerHTML = '<p>Аудио пока нет.</p>'; return; }
             container.innerHTML = audios.map(audio => `
                 <div class="meme-card">
-                    <audio controls style="width: 100%; padding: 20px;"><source src="${audio.url}"></audio>
-                    <div class="meme-caption">${audio.caption || 'Без описания'}</div>
-                    <div class="meme-actions">
-                        <div class="action-btn" onclick="likeContent('audio', ${audio.id})">❤️ ${audio.likes || 0}</div>
-                        <div class="action-btn">👤 ${audio.username || 'anon'}</div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="font-size: 3rem;">🎵</div>
+                        <div class="meme-caption">${escapeHtml(audio.caption || 'Без описания')}</div>
+                        <button onclick="playAudio('${audio.url}', '${escapeHtml(audio.caption)}')">▶️ Слушать</button>
+                        <div class="meme-actions">
+                            <div class="action-btn" onclick="likeContent('audio', ${audio.id})">❤️ ${audio.likes || 0}</div>
+                            <div class="action-btn">👤 ${escapeHtml(audio.username || 'anon')}</div>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
-
+        
         function renderFeed(feed) {
             const container = document.getElementById('feedContainer');
+            if (!container) return;
+            if (!feed.length) { container.innerHTML = '<p>Лента пуста.</p>'; return; }
             container.innerHTML = feed.map(item => `
                 <div class="meme-card">
-                    <video controls style="height: 500px;"><source src="${item.url}" type="video/mp4"></video>
-                    <div class="meme-caption">${item.caption || 'Без описания'}</div>
+                    <video controls style="max-height: 500px; width: 100%;" src="${item.url}"></video>
+                    <div class="meme-caption">${escapeHtml(item.caption || 'Без описания')}</div>
                     <div class="meme-actions">
                         <div class="action-btn" onclick="likeContent('feed', ${item.id})">❤️ ${item.likes || 0}</div>
-                        <div class="action-btn">👤 ${item.username || 'anon'}</div>
+                        <div class="action-btn">👤 ${escapeHtml(item.username || 'anon')}</div>
                     </div>
                 </div>
             `).join('');
         }
-
-        async function loadUsers() {
-            const res = await fetch('/api/users');
-            const users = await res.json();
-            const container = document.getElementById('usersContainer');
-            container.innerHTML = users.map(user => `
-                <div class="meme-card">
-                    <div style="padding: 20px; text-align: center;">
-                        <div style="font-size: 3rem;">👤</div>
-                        <div class="meme-caption">${user.username}</div>
-                        <div>⭐ ${user.rating || 0}</div>
-                        ${currentUser && currentUser.id !== user.id ? `<button onclick="subscribe(${currentUser.id}, ${user.id})" style="margin-top: 10px;">Подписаться</button>` : ''}
+        
+        function renderSingleMeme(meme) {
+            appRoot.innerHTML = `
+                <div class="single-meme-view">
+                    <div class="meme-card">
+                        ${meme.is_animated ? 
+                            `<video src="${meme.url}" controls style="width:100%"></video>` : 
+                            `<img src="${meme.url}" style="width:100%" onerror="this.src='https://via.placeholder.com/600x400?text=Ошибка'">`}
+                        <div class="meme-caption">${escapeHtml(meme.caption || 'Без описания')}</div>
+                        <div class="meme-actions">
+                            <div class="action-btn" onclick="likeContent('meme', ${meme.id})">❤️ ${meme.likes || 0}</div>
+                            <div class="action-btn">👤 ${escapeHtml(meme.username || 'anon')}</div>
+                        </div>
+                        <button onclick="window.location.href='/'">← На главную</button>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('totalUsers').textContent = users.length;
+            `;
         }
-
-        async function likeContent(type, id) {
-            if (!currentUser) {
-                showNotification('Войдите в аккаунт', 'error');
-                return;
-            }
-            const res = await fetch('/api/like', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: currentUser.id, contentType: type, contentId: id })
-            });
-            if (res.ok) loadContent();
+        
+        function renderUploadForm() {
+            const container = document.getElementById('uploadForm');
+            if (!container) return;
+            container.innerHTML = `
+                <h2>📤 Загрузить контент</h2>
+                <select id="contentType" style="width:100%; padding:10px; margin-bottom:20px;">
+                    <option value="meme">📷 Мем (изображение или GIF/видео)</option>
+                    <option value="video">🎬 Видео</option>
+                    <option value="audio">🎵 Аудио</option>
+                    <option value="feed">📱 Видео в ленту</option>
+                </select>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size:3rem;">📤</div>
+                    <div>Нажмите для выбора файла</div>
+                    <input type="file" id="fileInput" style="display:none;" accept="image/*,video/*,audio/*">
+                </div>
+                <input type="text" id="captionInput" placeholder="Введите описание..." style="width:100%; padding:12px; margin:15px 0; border-radius:10px; border:2px solid #ddd;">
+                <button onclick="uploadContent()" style="width:100%;">🚀 Опубликовать</button>
+            `;
         }
-
-        async function subscribe(subscriberId, targetId) {
-            const res = await fetch('/api/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscriber_id: subscriberId, subscribed_to_id: targetId })
-            });
-            if (res.ok) {
-                showNotification('✅ Готово!');
-                loadUsers();
-            }
-        }
-
+        
         async function uploadContent() {
             if (!currentUser) {
                 showNotification('Сначала войдите в аккаунт', 'error');
+                switchSection('profile');
                 return;
             }
             const file = document.getElementById('fileInput').files[0];
-            if (!file) {
-                showNotification('Выберите файл', 'error');
-                return;
-            }
+            if (!file) { showNotification('Выберите файл', 'error'); return; }
             const formData = new FormData();
             formData.append('file', file);
             formData.append('userId', currentUser.id);
             formData.append('caption', document.getElementById('captionInput').value);
             formData.append('type', document.getElementById('contentType').value);
             
-            const res = await fetch('/api/upload', { method: 'POST', body: formData });
-            if (res.ok) {
-                showNotification('✅ Опубликовано!');
-                document.getElementById('fileInput').value = '';
-                document.getElementById('captionInput').value = '';
-                loadContent();
-            } else {
+            try {
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                if (res.ok) {
+                    showNotification('✅ Опубликовано!');
+                    document.getElementById('fileInput').value = '';
+                    document.getElementById('captionInput').value = '';
+                    loadContent();
+                } else throw new Error('Ошибка загрузки');
+            } catch(e) {
                 showNotification('Ошибка при загрузке', 'error');
             }
         }
-
+        
+        async function loadUsers() {
+            try {
+                const users = await apiRequest('/api/users');
+                const container = document.getElementById('usersContainer');
+                if (!container) return;
+                container.innerHTML = users.map(user => `
+                    <div class="meme-card">
+                        <div style="padding:20px; text-align:center;">
+                            <div style="font-size:3rem;">👤</div>
+                            <div class="meme-caption">${escapeHtml(user.username)}</div>
+                            <div>⭐ ${user.rating || 0}</div>
+                            ${currentUser && currentUser.id !== user.id ? `<button onclick="subscribe(${currentUser.id}, ${user.id})">Подписаться</button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('totalUsers').textContent = users.length;
+            } catch(e) {}
+        }
+        
+        async function loadProfileUI() {
+            const container = document.getElementById('profileContainer');
+            if (!container) return;
+            if (!currentUser) {
+                container.innerHTML = `
+                    <div id="loginForm" class="auth-form">
+                        <h3>🔐 Вход</h3>
+                        <input type="text" id="loginUsername" class="auth-input" placeholder="Имя">
+                        <input type="password" id="loginPassword" class="auth-input" placeholder="Пароль">
+                        <button onclick="login()">Войти</button>
+                        <p style="text-align:center; margin-top:15px;"><a href="#" onclick="showRegister()">Регистрация</a></p>
+                    </div>
+                    <div id="registerForm" class="auth-form" style="display:none;">
+                        <h3>🚀 Регистрация</h3>
+                        <input type="text" id="regUsername" class="auth-input" placeholder="Имя">
+                        <input type="email" id="regEmail" class="auth-input" placeholder="Email">
+                        <input type="password" id="regPassword" class="auth-input" placeholder="Пароль">
+                        <button onclick="register()">Зарегистрироваться</button>
+                        <p style="text-align:center; margin-top:15px;"><a href="#" onclick="showLogin()">Вход</a></p>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = `
+                <div class="user-info">
+                    <div style="width:100px; height:100px; background:var(--primary); border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:3rem;">👤</div>
+                    <h2>${escapeHtml(currentUser.username)}</h2>
+                    <p>📅 Присоединился: ${formatDate(currentUser.joinDate)}</p>
+                    <p>⭐ Рейтинг: ${currentUser.rating || 0}</p>
+                    <p>👥 Подписчиков: ${currentUser.subscribers || 0}</p>
+                    <p>📢 Подписок: ${currentUser.subscriptions || 0}</p>
+                    <button onclick="logout()" style="background:var(--accent);">Выйти</button>
+                </div>
+            `;
+        }
+        
+        async function likeContent(type, id) {
+            if (!currentUser) { showNotification('Войдите в аккаунт', 'error'); return; }
+            try {
+                await apiRequest('/api/like', { method: 'POST', body: JSON.stringify({ userId: currentUser.id, contentType: type, contentId: id }) });
+                loadContent();
+            } catch(e) {}
+        }
+        
+        async function subscribe(subscriberId, targetId) {
+            try {
+                await apiRequest('/api/subscribe', { method: 'POST', body: JSON.stringify({ subscriber_id: subscriberId, subscribed_to_id: targetId }) });
+                showNotification('✅ Готово!');
+                loadUsers();
+            } catch(e) {}
+        }
+        
         async function login() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            if (res.ok) {
-                currentUser = await res.json();
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                showNotification(`Добро пожаловать, ${currentUser.username}!`);
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('profileInfo').style.display = 'block';
-                document.getElementById('profileUsername').textContent = currentUser.username;
-                document.getElementById('profileJoinDate').textContent = new Date(currentUser.joinDate).toLocaleDateString();
-                document.getElementById('profileRating').textContent = currentUser.rating;
-                document.getElementById('profileSubscribers').textContent = currentUser.subscribers;
-                document.getElementById('profileSubscriptions').textContent = currentUser.subscriptions;
-                document.getElementById('myRating').textContent = currentUser.rating;
-                socket.emit('user_online', currentUser.id);
-            } else {
-                const err = await res.json();
-                showNotification(err.error, 'error');
-            }
+            try {
+                const user = await apiRequest('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showNotification(`Добро пожаловать, ${user.username}!`);
+                document.getElementById('myRating').textContent = user.rating;
+                socket.emit('user_online', user.id);
+                renderHome();
+            } catch(e) {}
         }
-
+        
         async function register() {
             const username = document.getElementById('regUsername').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
-            });
-            if (res.ok) {
+            try {
+                await apiRequest('/api/register', { method: 'POST', body: JSON.stringify({ username, email, password }) });
                 showNotification('Регистрация успешна! Теперь войдите.');
                 showLogin();
-            } else {
-                const err = await res.json();
-                showNotification(err.error, 'error');
-            }
+            } catch(e) {}
         }
-
+        
         function logout() {
             currentUser = null;
             localStorage.removeItem('currentUser');
-            document.getElementById('authSection').style.display = 'block';
-            document.getElementById('profileInfo').style.display = 'none';
-            showNotification('Вы вышли из аккаунта');
+            showNotification('Вы вышли');
+            renderHome();
         }
-
+        
         function showRegister() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
+            const loginDiv = document.getElementById('loginForm');
+            const regDiv = document.getElementById('registerForm');
+            if (loginDiv) loginDiv.style.display = 'none';
+            if (regDiv) regDiv.style.display = 'block';
         }
-
+        
         function showLogin() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
+            const loginDiv = document.getElementById('loginForm');
+            const regDiv = document.getElementById('registerForm');
+            if (loginDiv) loginDiv.style.display = 'block';
+            if (regDiv) regDiv.style.display = 'none';
         }
-
-        // Загрузка сохранённого пользователя
-        const saved = localStorage.getItem('currentUser');
-        if (saved) {
-            currentUser = JSON.parse(saved);
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('profileInfo').style.display = 'block';
-            document.getElementById('profileUsername').textContent = currentUser.username;
-            document.getElementById('profileJoinDate').textContent = currentUser.joinDate ? new Date(currentUser.joinDate).toLocaleDateString() : 'недавно';
-            document.getElementById('profileRating').textContent = currentUser.rating || 0;
-            document.getElementById('profileSubscribers').textContent = currentUser.subscribers || 0;
-            document.getElementById('profileSubscriptions').textContent = currentUser.subscriptions || 0;
-            document.getElementById('myRating').textContent = currentUser.rating || 0;
-            socket.emit('user_online', currentUser.id);
+        
+        function updateStats() {
+            if (currentUser) document.getElementById('myRating').textContent = currentUser.rating || 0;
         }
-
-        loadContent();
-        loadUsers();
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+        
+        // --- Загрузка сохранённого пользователя и старт ---
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                currentUser = JSON.parse(savedUser);
+                if (currentUser.id) socket.emit('user_online', currentUser.id);
+            } catch(e) {}
+        }
+        initPlayer();
+        renderMainApp();
+        
+        // Глобальные функции для onclick
+        window.likeContent = likeContent;
+        window.subscribe = subscribe;
+        window.login = login;
+        window.register = register;
+        window.logout = logout;
+        window.showRegister = showRegister;
+        window.showLogin = showLogin;
+        window.uploadContent = uploadContent;
+        window.playAudio = playAudio;
+        window.switchSection = switchSection;
+        window.loadContent = loadContent;
+        window.loadUsers = loadUsers;
     </script>
 </body>
 </html>
