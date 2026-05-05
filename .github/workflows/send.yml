@@ -1,0 +1,13 @@
+name: Send Telegram Message
+on: 
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Telegram
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot8611724589:AAFbdZ3xfEyI_fAR9MxsSBE1SMQYiURjJpk/sendMessage" \
+            -d "chat_id=-1003818101194" \
+            -d "text=Обнова!+mempolis.onrender.com+обновился!"
