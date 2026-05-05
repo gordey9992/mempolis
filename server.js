@@ -14,7 +14,6 @@ const io = socketIo(server, {
   cors: { origin: "*" }
 });
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
@@ -44,14 +43,12 @@ const storage = multer.diskStorage({
     cb(null, uniqueName);
   }
 });
-const upload = multer({ storage, limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB лимит
+const upload = multer({ storage, limits: { fileSize: 100 * 1024 * 1024 } });
 
 // ========== БАЗА ДАННЫХ ==========
 const db = new sqlite3.Database('database.sqlite');
 
-// Создание таблиц
 db.serialize(() => {
-  // Пользователи
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
@@ -62,7 +59,6 @@ db.serialize(() => {
     rating INTEGER DEFAULT 0
   )`);
   
-  // Подписки
   db.run(`CREATE TABLE IF NOT EXISTS subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subscriber_id INTEGER,
@@ -71,7 +67,6 @@ db.serialize(() => {
     FOREIGN KEY(subscribed_to_id) REFERENCES users(id)
   )`);
   
-  // Мемы
   db.run(`CREATE TABLE IF NOT EXISTS memes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -80,10 +75,10 @@ db.serialize(() => {
     likes INTEGER DEFAULT 0,
     comments INTEGER DEFAULT 0,
     timestamp TEXT,
+    is_animated INTEGER DEFAULT 0,
     FOREIGN KEY(user_id) REFERENCES users(id)
   )`);
   
-  // Видео
   db.run(`CREATE TABLE IF NOT EXISTS videos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -95,7 +90,6 @@ db.serialize(() => {
     FOREIGN KEY(user_id) REFERENCES users(id)
   )`);
   
-  // Аудио
   db.run(`CREATE TABLE IF NOT EXISTS audios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -107,7 +101,6 @@ db.serialize(() => {
     FOREIGN KEY(user_id) REFERENCES users(id)
   )`);
   
-  // Лента (Reels)
   db.run(`CREATE TABLE IF NOT EXISTS feed (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -119,7 +112,6 @@ db.serialize(() => {
     FOREIGN KEY(user_id) REFERENCES users(id)
   )`);
   
-  // Лайки (для отслеживания, чтобы нельзя было лайкнуть дважды)
   db.run(`CREATE TABLE IF NOT EXISTS likes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
@@ -129,9 +121,33 @@ db.serialize(() => {
   )`);
 });
 
+// Создание системного пользователя и добавление начальных мемов
+db.get(`SELECT id FROM users WHERE id = 1`, (err, user) => {
+  if (!user) {
+    db.run(`INSERT INTO users (id, username, email, password, joinDate, rating) VALUES (1, 'system', 'system@mempolis.com', '', datetime('now'), 0)`);
+  }
+  
+  db.get(`SELECT COUNT(*) as count FROM memes WHERE user_id = 1`, (err, row) => {
+    if (row.count === 0) {
+      const defaultMemes = [
+        { image: "https://i.imgflip.com/30b1gx.jpg", caption: "Два штата - вечная классика! 🤣" },
+        { image: "https://i.imgflip.com/1g8my4.jpg", caption: "Когда показываешь мем другу 😎" },
+        { image: "https://i.imgflip.com/1bij.jpg", caption: "Ожидание vs Реальность 🎭" },
+        { image: "https://i.imgflip.com/aqzqvu.jpg", caption: "Медаль для Обамы: На! Пасиба! 🏅" }
+      ];
+      
+      defaultMemes.forEach(meme => {
+        db.run(`INSERT INTO memes (user_id, image, caption, likes, comments, timestamp) VALUES (1, ?, ?, 0, 0, ?)`,
+          [meme.image, meme.caption, new Date().toISOString()]
+        );
+      });
+      console.log('✅ Добавлены начальные мемы в БД');
+    }
+  });
+});
+
 // ========== API ЭНДПОИНТЫ ==========
 
-// Регистрация
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
@@ -157,7 +173,6 @@ app.post('/api/register', async (req, res) => {
   );
 });
 
-// Вход
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   
@@ -171,7 +186,6 @@ app.post('/api/login', (req, res) => {
       return res.status(400).json({ error: 'Неверный пароль' });
     }
     
-    // Получаем количество подписчиков и подписок
     db.get(`SELECT COUNT(*) as subscribers FROM subscriptions WHERE subscribed_to_id = ?`, [user.id], (err, subCount) => {
       db.get(`SELECT COUNT(*) as subscriptions FROM subscriptions WHERE subscriber_id = ?`, [user.id], (err, subsCount) => {
         res.json({
@@ -189,7 +203,6 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// Получение профиля пользователя
 app.get('/api/user/:id', (req, res) => {
   const userId = req.params.id;
   
@@ -210,7 +223,6 @@ app.get('/api/user/:id', (req, res) => {
   });
 });
 
-// Подписаться / отписаться
 app.post('/api/subscribe', (req, res) => {
   const { subscriber_id, subscribed_to_id } = req.body;
   
@@ -218,18 +230,15 @@ app.post('/api/subscribe', (req, res) => {
     return res.status(400).json({ error: 'Нельзя подписаться на себя' });
   }
   
-  // Проверяем, есть ли уже подписка
   db.get(`SELECT id FROM subscriptions WHERE subscriber_id = ? AND subscribed_to_id = ?`,
     [subscriber_id, subscribed_to_id], (err, sub) => {
       if (sub) {
-        // Отписываемся
         db.run(`DELETE FROM subscriptions WHERE subscriber_id = ? AND subscribed_to_id = ?`,
           [subscriber_id, subscribed_to_id], (err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ subscribed: false });
           });
       } else {
-        // Подписываемся
         db.run(`INSERT INTO subscriptions (subscriber_id, subscribed_to_id) VALUES (?, ?)`,
           [subscriber_id, subscribed_to_id], (err) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -240,7 +249,6 @@ app.post('/api/subscribe', (req, res) => {
   );
 });
 
-// Получить всех пользователей (для поиска)
 app.get('/api/users', (req, res) => {
   db.all(`SELECT id, username, avatar, rating FROM users ORDER BY rating DESC LIMIT 50`, (err, users) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -248,13 +256,19 @@ app.get('/api/users', (req, res) => {
   });
 });
 
-// Загрузка контента
+// Загрузка контента (с поддержкой анимированных мемов — видео)
 app.post('/api/upload', upload.single('file'), (req, res) => {
   const { userId, caption, type } = req.body;
   const fileUrl = `/uploads/${type}s/${req.file.filename}`;
   const timestamp = new Date().toISOString();
   
   let table;
+  let isAnimated = 0;
+  
+  if (type === 'meme' && req.file.mimetype.startsWith('video/')) {
+    isAnimated = 1;
+  }
+  
   switch(type) {
     case 'meme': table = 'memes'; break;
     case 'video': table = 'videos'; break;
@@ -263,20 +277,23 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     default: return res.status(400).json({ error: 'Неизвестный тип' });
   }
   
-  db.run(`INSERT INTO ${table} (user_id, url, caption, likes, comments, timestamp) VALUES (?, ?, ?, 0, 0, ?)`,
-    [userId, fileUrl, caption, timestamp],
-    function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      
-      // Увеличиваем рейтинг пользователя
-      db.run(`UPDATE users SET rating = rating + 10 WHERE id = ?`, [userId]);
-      
-      // Уведомляем всех через WebSocket о новом контенте
-      io.emit('new_content', { type, id: this.lastID, userId, fileUrl, caption, timestamp });
-      
-      res.json({ id: this.lastID, url: fileUrl, caption, type });
-    }
-  );
+  const insertSQL = table === 'memes' 
+    ? `INSERT INTO ${table} (user_id, url, caption, likes, comments, timestamp, is_animated) VALUES (?, ?, ?, 0, 0, ?, ?)`
+    : `INSERT INTO ${table} (user_id, url, caption, likes, comments, timestamp) VALUES (?, ?, ?, 0, 0, ?)`;
+  
+  const params = table === 'memes' 
+    ? [userId, fileUrl, caption, timestamp, isAnimated]
+    : [userId, fileUrl, caption, timestamp];
+  
+  db.run(insertSQL, params, function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    
+    db.run(`UPDATE users SET rating = rating + 10 WHERE id = ?`, [userId]);
+    
+    io.emit('new_content', { type, id: this.lastID, userId, fileUrl, caption, timestamp });
+    
+    res.json({ id: this.lastID, url: fileUrl, caption, type });
+  });
 });
 
 // Получение контента
@@ -284,6 +301,14 @@ app.get('/api/memes', (req, res) => {
   db.all(`SELECT m.*, u.username FROM memes m JOIN users u ON m.user_id = u.id ORDER BY m.id DESC`, (err, memes) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(memes);
+  });
+});
+
+app.get('/api/meme/:id', (req, res) => {
+  const id = req.params.id;
+  db.get(`SELECT m.*, u.username FROM memes m JOIN users u ON m.user_id = u.id WHERE m.id = ?`, [id], (err, meme) => {
+    if (err || !meme) return res.status(404).json({ error: 'Мем не найден' });
+    res.json(meme);
   });
 });
 
@@ -312,11 +337,9 @@ app.get('/api/feed', (req, res) => {
 app.post('/api/like', (req, res) => {
   const { userId, contentType, contentId } = req.body;
   
-  // Проверяем, не лайкнул ли уже
   db.get(`SELECT id FROM likes WHERE user_id = ? AND content_type = ? AND content_id = ?`,
     [userId, contentType, contentId], (err, existing) => {
       if (existing) {
-        // Убираем лайк
         db.run(`DELETE FROM likes WHERE user_id = ? AND content_type = ? AND content_id = ?`,
           [userId, contentType, contentId]);
         
@@ -332,14 +355,12 @@ app.post('/api/like', (req, res) => {
         db.run(`UPDATE ${table} SET likes = likes - 1 WHERE id = ?`, [contentId], (err) => {
           if (err) return res.status(500).json({ error: err.message });
           
-          // Получаем обновлённое количество лайков
           db.get(`SELECT likes FROM ${table} WHERE id = ?`, [contentId], (err, row) => {
             io.emit('like_updated', { contentType, contentId, likes: row.likes });
             res.json({ liked: false, likes: row.likes });
           });
         });
       } else {
-        // Добавляем лайк
         db.run(`INSERT INTO likes (user_id, content_type, content_id) VALUES (?, ?, ?)`,
           [userId, contentType, contentId]);
         
@@ -356,7 +377,6 @@ app.post('/api/like', (req, res) => {
           if (err) return res.status(500).json({ error: err.message });
           
           db.get(`SELECT likes FROM ${table} WHERE id = ?`, [contentId], (err, row) => {
-            // Увеличиваем рейтинг автора
             db.get(`SELECT user_id FROM ${table} WHERE id = ?`, [contentId], (err, content) => {
               if (content) {
                 db.run(`UPDATE users SET rating = rating + 1 WHERE id = ?`, [content.user_id]);
@@ -389,7 +409,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// ========== ЗАПУСК СЕРВЕРА ==========
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Сервер МЕМПОЛИС запущен на http://localhost:${PORT}`);
