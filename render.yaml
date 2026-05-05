@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: mempolis
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8611724589:AAFbdZ3xfEyI_fAR9MxsSBE1SMQYiURjJpk
+      - key: TELEGRAM_CHAT_ID
+        value: -1003818101194
