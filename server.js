@@ -392,6 +392,26 @@ app.post('/api/like', (req, res) => {
   );
 });
 
+// ========== TELEGRAM УВЕДОМЛЕНИЕ ==========
+async function sendTelegramNotification() {
+    const TELEGRAM_BOT_TOKEN = '8611724589:AAFbdZ3xfEyI_fAR9MxsSBE1SMQYiURjJpk';
+    const TELEGRAM_CHAT_ID = '-1003818101194';
+    
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: 'Обнова! mempolis.onrender.com обновился!'
+            })
+        });
+        console.log('✅ Уведомление отправлено в Telegram');
+    } catch (error) {
+        console.log('❌ Ошибка:', error.message);
+    }
+}
+
 // ========== WEB SOCKETS ==========
 io.on('connection', (socket) => {
   console.log('Пользователь подключился:', socket.id);
@@ -409,7 +429,11 @@ io.on('connection', (socket) => {
   });
 });
 
+// ========== ЗАПУСК СЕРВЕРА ==========
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 Сервер МЕМПОЛИС запущен на http://localhost:${PORT}`);
+  console.log(`🚀 Сервер МЕМПОЛИС запущен на порту ${PORT}`);
 });
+
+// ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ ПОСЛЕ ЗАПУСКА
+sendTelegramNotification();
