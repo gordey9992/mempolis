@@ -25,8 +25,36 @@
         body {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
+            padding-top: 70px;
+            padding-bottom: 90px;
+        }
+
+        /* Фиксированная верхняя панель навигации */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            overflow-x: auto;
+            gap: 5px;
             padding: 10px;
-            padding-bottom: 90px; /* Место для фиксированного плеера */
+            z-index: 1000;
+            border-bottom: 1px solid #444;
+        }
+        .top-nav button {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        .top-nav button.active {
+            background: var(--accent);
         }
 
         .container {
@@ -38,69 +66,11 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         }
 
-        header {
-            text-align: center;
-            padding: 30px;
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            border-radius: 20px;
-            margin-bottom: 25px;
-            color: white;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .menu-item {
-            background: var(--dark);
-            padding: 12px;
-            text-align: center;
-            color: white;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .menu-item:hover, .menu-item.active {
-            background: var(--accent);
-            transform: scale(1.05);
-        }
-
         .content-section {
             display: none;
         }
-
         .content-section.active {
             display: block;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            background: var(--dark);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--success);
         }
 
         .meme-grid {
@@ -115,46 +85,65 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s;
-            cursor: pointer;
         }
-
         .meme-card:hover {
             transform: translateY(-5px);
         }
-
         .meme-card img, .meme-card video {
             width: 100%;
             height: 250px;
             object-fit: cover;
             background: #000;
         }
-
         .meme-caption {
             padding: 15px;
             font-weight: 600;
-            word-break: break-word;
         }
-
         .meme-actions {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             padding: 10px;
             background: var(--light);
+            flex-wrap: wrap;
         }
-
         .action-btn {
             cursor: pointer;
             padding: 8px 15px;
             border-radius: 20px;
             transition: all 0.3s;
-            user-select: none;
         }
-
         .action-btn:hover {
             background: white;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
-
+        .comments-section {
+            padding: 10px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+        }
+        .comment {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+        .comment-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .comment-input input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+        .comment-input button {
+            padding: 8px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+        }
         .upload-area {
             border: 3px dashed var(--primary);
             border-radius: 20px;
@@ -163,17 +152,10 @@
             cursor: pointer;
             margin: 20px 0;
         }
-
-        .upload-area:hover {
-            border-color: var(--accent);
-            background: rgba(102, 126, 234, 0.05);
-        }
-
         .auth-form {
             max-width: 400px;
             margin: 0 auto;
         }
-
         .auth-input {
             width: 100%;
             padding: 12px;
@@ -181,7 +163,6 @@
             border: 2px solid #ddd;
             border-radius: 10px;
         }
-
         button {
             background: var(--primary);
             color: white;
@@ -189,40 +170,21 @@
             padding: 12px 24px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
         .notification {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
             background: var(--success);
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
-            z-index: 1000;
+            z-index: 1001;
             transform: translateX(400px);
             transition: transform 0.3s;
         }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.error {
-            background: var(--accent);
-        }
-
-        .user-info {
-            text-align: center;
-            padding: 20px;
-        }
+        .notification.show { transform: translateX(0); }
+        .notification.error { background: var(--accent); }
 
         /* Фиксированный аудиоплеер */
         .fixed-player {
@@ -230,22 +192,17 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(10px);
             padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
-            z-index: 999;
-            border-top: 1px solid #444;
+            z-index: 1000;
             transform: translateY(100%);
             transition: transform 0.3s;
         }
-        
-        .fixed-player.show {
-            transform: translateY(0);
-        }
-        
+        .fixed-player.show { transform: translateY(0); }
         .player-info {
             flex: 1;
             color: white;
@@ -254,54 +211,29 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
         .player-controls {
             display: flex;
             gap: 15px;
             align-items: center;
         }
-        
-        .player-controls button {
+        .player-controls button, .player-close {
             background: none;
             border: none;
             color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        .player-close {
-            background: none;
-            border: none;
-            color: #ff6b6b;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             cursor: pointer;
         }
-        
-        .single-meme-view {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
+        .player-close { color: #ff6b6b; }
+
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            .menu {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .meme-card img, .meme-card video {
-                height: 200px;
-            }
+            .container { padding: 10px; }
+            .meme-card img, .meme-card video { height: 200px; }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="appRoot">
-        <!-- Динамическое содержимое будет здесь -->
-    </div>
-    
-    <!-- Фиксированный плеер -->
+    <div class="top-nav" id="topNav"></div>
+    <div class="container" id="appRoot"></div>
     <div class="fixed-player" id="audioPlayer">
         <div class="player-info" id="playerInfo">Нет трека</div>
         <div class="player-controls">
@@ -311,76 +243,32 @@
     </div>
 
     <script>
-        // --- Глобальные переменные ---
         let socket = io();
         let currentUser = null;
         let onlineUsers = new Set();
-        let currentPlayingAudio = null;
-        let currentAudioId = null;
-        
-        // --- DOM элементы ---
-        const appRoot = document.getElementById('appRoot');
-        const audioPlayerDiv = document.getElementById('audioPlayer');
-        const playerInfoSpan = document.getElementById('playerInfo');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const closePlayerBtn = document.getElementById('closePlayerBtn');
-        
         let audioElement = null;
-        
-        // --- Инициализация плеера ---
-        function initPlayer() {
-            if (!audioElement) {
-                audioElement = new Audio();
-                audioElement.addEventListener('play', () => playPauseBtn.textContent = '⏸️');
-                audioElement.addEventListener('pause', () => playPauseBtn.textContent = '▶️');
-                audioElement.addEventListener('ended', () => {
-                    audioPlayerDiv.classList.remove('show');
-                    currentPlayingAudio = null;
-                    currentAudioId = null;
-                });
-            }
-            
-            playPauseBtn.onclick = () => {
-                if (audioElement.paused) audioElement.play();
-                else audioElement.pause();
-            };
-            
-            closePlayerBtn.onclick = () => {
-                audioElement.pause();
-                audioPlayerDiv.classList.remove('show');
-                currentPlayingAudio = null;
-                currentAudioId = null;
-            };
-        }
-        
-        function playAudio(url, title) {
-            if (!audioElement) initPlayer();
-            audioElement.src = url;
-            audioElement.play();
-            playerInfoSpan.textContent = title || 'Аудио';
-            audioPlayerDiv.classList.add('show');
-            currentPlayingAudio = { url, title };
-        }
-        
-        // --- Вспомогательные функции ---
+        let currentComments = {}; // { тип_ид: [комментарии] }
+
+        // === Вспомогательные функции ===
         function showNotification(msg, type = 'normal') {
             const notif = document.createElement('div');
             notif.className = `notification ${type === 'error' ? 'error' : ''}`;
             notif.textContent = msg;
             document.body.appendChild(notif);
             setTimeout(() => notif.classList.add('show'), 100);
-            setTimeout(() => {
-                notif.classList.remove('show');
-                setTimeout(() => notif.remove(), 300);
-            }, 3000);
+            setTimeout(() => { notif.classList.remove('show'); setTimeout(() => notif.remove(), 300); }, 3000);
         }
-        
-        function formatDate(isoString) {
-            if (!isoString) return 'недавно';
-            return new Date(isoString).toLocaleDateString();
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
-        
-        // --- API вызовы ---
+
         async function apiRequest(url, options = {}) {
             try {
                 const res = await fetch(url, {
@@ -389,389 +277,302 @@
                 });
                 if (!res.ok) {
                     const error = await res.json();
-                    throw new Error(error.error || 'Ошибка запроса');
+                    throw new Error(error.error || 'Ошибка');
                 }
                 return await res.json();
-            } catch (e) {
+            } catch(e) {
                 showNotification(e.message, 'error');
                 throw e;
             }
         }
-        
-        // --- Отрисовка главного интерфейса ---
-        async function renderMainApp() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const memeId = urlParams.get('meme');
-            
-            if (memeId && !isNaN(memeId)) {
-                try {
-                    const meme = await apiRequest(`/api/meme/${memeId}`);
-                    renderSingleMeme(meme);
-                } catch(e) {
-                    renderHome();
-                }
-                return;
+
+        // === Аудиоплеер ===
+        function initPlayer() {
+            if (!audioElement) {
+                audioElement = new Audio();
+                audioElement.addEventListener('play', () => playPauseBtn.textContent = '⏸️');
+                audioElement.addEventListener('pause', () => playPauseBtn.textContent = '▶️');
+                audioElement.addEventListener('ended', () => {
+                    document.getElementById('audioPlayer').classList.remove('show');
+                });
             }
-            renderHome();
+            document.getElementById('playPauseBtn').onclick = () => {
+                if (audioElement.paused) audioElement.play();
+                else audioElement.pause();
+            };
+            document.getElementById('closePlayerBtn').onclick = () => {
+                audioElement.pause();
+                document.getElementById('audioPlayer').classList.remove('show');
+            };
         }
-        
-        function renderHome() {
-            appRoot.innerHTML = `
-                <header>
-                    <h1>🎭 МЕМПОЛИС 4.0</h1>
-                    <p>Социальная сеть мемов с реальной синхронизацией</p>
-                </header>
-                <div class="menu">
-                    <div class="menu-item" data-section="memes">📷 Мемы</div>
-                    <div class="menu-item" data-section="videos">🎬 Видео</div>
-                    <div class="menu-item" data-section="audios">🎵 Музыка</div>
-                    <div class="menu-item" data-section="feed">📱 Лента</div>
-                    <div class="menu-item" data-section="upload">📤 Загрузить</div>
-                    <div class="menu-item" data-section="users">👥 Пользователи</div>
-                    <div class="menu-item" data-section="profile">👤 Профиль</div>
+
+        function playAudio(url, title) {
+            if (!audioElement) initPlayer();
+            audioElement.src = url;
+            audioElement.play();
+            document.getElementById('playerInfo').textContent = title || 'Аудио';
+            document.getElementById('audioPlayer').classList.add('show');
+        }
+
+        // === Комментарии (локально для простоты, можно расширить на БД) ===
+        function loadComments(contentType, contentId, containerId) {
+            const key = `${contentType}_${contentId}`;
+            const comments = currentComments[key] || [];
+            const commentsHtml = comments.map(c => `<div class="comment"><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</div>`).join('');
+            document.getElementById(containerId).innerHTML = `
+                <div class="comments-section">
+                    <div id="comments-list-${contentId}">${commentsHtml || '<i>Нет комментариев</i>'}</div>
+                    ${currentUser ? `<div class="comment-input">
+                        <input type="text" id="comment-text-${contentId}" placeholder="Ваш комментарий...">
+                        <button onclick="addComment('${contentType}', ${contentId})">Отправить</button>
+                    </div>` : '<i>Войдите, чтобы комментировать</i>'}
                 </div>
-                <div class="stats">
-                    <div class="stat-item"><div class="stat-value" id="totalMemes">0</div><div>Мемов</div></div>
-                    <div class="stat-item"><div class="stat-value" id="totalUsers">0</div><div>Пользователей</div></div>
-                    <div class="stat-item"><div class="stat-value" id="onlineCount">1</div><div>Онлайн</div></div>
-                    <div class="stat-item"><div class="stat-value" id="myRating">0</div><div>Мой рейтинг</div></div>
-                </div>
-                <div id="memes" class="content-section active"><div class="meme-grid" id="memesContainer">Загрузка...</div></div>
-                <div id="videos" class="content-section"><div class="meme-grid" id="videosContainer"></div></div>
-                <div id="audios" class="content-section"><div class="meme-grid" id="audiosContainer"></div></div>
-                <div id="feed" class="content-section"><div class="meme-grid" id="feedContainer"></div></div>
-                <div id="upload" class="content-section"><div id="uploadForm"></div></div>
-                <div id="users" class="content-section"><div class="meme-grid" id="usersContainer"></div></div>
-                <div id="profile" class="content-section"><div id="profileContainer"></div></div>
             `;
-            
-            // Подписка на клики по меню
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', () => switchSection(item.dataset.section));
-            });
-            
-            // Загрузка данных
-            loadContent();
-            loadUsers();
-            updateStats();
-            loadProfileUI();
-            
-            // Обработка сокетов для обновлений
-            socket.on('new_content', () => { loadContent(); });
-            socket.on('like_updated', () => { loadContent(); });
-            socket.on('user_status', (data) => {
-                if (data.status === 'online') onlineUsers.add(data.userId);
-                else onlineUsers.delete(data.userId);
-                document.getElementById('onlineCount').textContent = onlineUsers.size + 1;
-            });
-            if (currentUser) socket.emit('user_online', currentUser.id);
         }
-        
-        function switchSection(section) {
+
+        window.addComment = function(contentType, contentId) {
+            if (!currentUser) { showNotification('Войдите в аккаунт', 'error'); return; }
+            const input = document.getElementById(`comment-text-${contentId}`);
+            const text = input.value.trim();
+            if (!text) return;
+            const key = `${contentType}_${contentId}`;
+            if (!currentComments[key]) currentComments[key] = [];
+            currentComments[key].push({ user: currentUser.username, text });
+            input.value = '';
+            loadComments(contentType, contentId, `comments-${contentType}-${contentId}`);
+        };
+
+        // === Основные функции ===
+        async function randomMeme() {
+            try {
+                const memes = await apiRequest('/api/memes');
+                if (memes.length) {
+                    const random = memes[Math.floor(Math.random() * memes.length)];
+                    window.location.href = `/?meme=${random.id}`;
+                } else showNotification('Нет мемов', 'error');
+            } catch(e) {}
+        }
+
+        async function likeContent(type, id) {
+            if (!currentUser) { showNotification('Войдите', 'error'); return; }
+            await apiRequest('/api/like', { method: 'POST', body: JSON.stringify({ userId: currentUser.id, contentType: type, contentId: id }) });
+            loadContent();
+        }
+
+        async function subscribe(subscriberId, targetId) {
+            await apiRequest('/api/subscribe', { method: 'POST', body: JSON.stringify({ subscriber_id: subscriberId, subscribed_to_id: targetId }) });
+            showNotification('✅ Готово');
+            loadUsers();
+        }
+
+        function shareContent(type, id) {
+            const url = `${window.location.origin}/?${type}=${id}`;
+            navigator.clipboard.writeText(url);
+            showNotification('📋 Ссылка скопирована');
+        }
+
+        // === Рендер ===
+        function renderTopNav(activeSection) {
+            const sections = ['memes', 'videos', 'audios', 'feed', 'upload', 'users', 'profile'];
+            const names = { memes:'📷 Мемы', videos:'🎬 Видео', audios:'🎵 Музыка', feed:'📱 Лента', upload:'📤 Загрузить', users:'👥 Пользователи', profile:'👤 Профиль' };
+            document.getElementById('topNav').innerHTML = sections.map(s => `<button class="${activeSection === s ? 'active' : ''}" onclick="switchSection('${s}')">${names[s]}</button>`).join('');
+        }
+
+        window.switchSection = function(section) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(section).classList.add('active');
+            renderTopNav(section);
             if (section === 'upload') renderUploadForm();
             if (section === 'profile') loadProfileUI();
             if (section === 'users') loadUsers();
-        }
-        
+        };
+
         async function loadContent() {
-            try {
-                const [memes, videos, audios, feed] = await Promise.all([
-                    apiRequest('/api/memes'),
-                    apiRequest('/api/videos'),
-                    apiRequest('/api/audios'),
-                    apiRequest('/api/feed')
-                ]);
-                renderMemes(memes);
-                renderVideos(videos);
-                renderAudios(audios);
-                renderFeed(feed);
-                document.getElementById('totalMemes').textContent = memes.length;
-            } catch(e) {}
+            const [memes, videos, audios, feed] = await Promise.all([
+                apiRequest('/api/memes'), apiRequest('/api/videos'), apiRequest('/api/audios'), apiRequest('/api/feed')
+            ]);
+            renderMemes(memes);
+            renderVideos(videos);
+            renderAudios(audios);
+            renderFeed(feed);
         }
-        
+
         function renderMemes(memes) {
             const container = document.getElementById('memesContainer');
             if (!container) return;
-            if (!memes.length) { container.innerHTML = '<p>Мемов пока нет. Загрузите первый!</p>'; return; }
             container.innerHTML = memes.map(meme => `
-                <div class="meme-card" onclick="window.location.href='/?meme=${meme.id}'">
-                    ${meme.is_animated ? 
-                        `<video src="${meme.url}" controls onclick="event.stopPropagation()"></video>` : 
-                        `<img src="${meme.url}" alt="мем" onerror="this.src='https://via.placeholder.com/300x200?text=Ошибка'">`}
-                    <div class="meme-caption">${escapeHtml(meme.caption || 'Без описания')}</div>
+                <div class="meme-card">
+                    ${meme.is_animated ? `<video src="${meme.url}" controls></video>` : `<img src="${meme.url}" onerror="this.src='https://via.placeholder.com/300x200'">`}
+                    <div class="meme-caption">${escapeHtml(meme.caption)}</div>
                     <div class="meme-actions">
-                        <div class="action-btn" onclick="event.stopPropagation(); likeContent('meme', ${meme.id})">❤️ ${meme.likes || 0}</div>
-                        <div class="action-btn">👤 ${escapeHtml(meme.username || 'anon')}</div>
+                        <div class="action-btn" onclick="likeContent('meme', ${meme.id})">❤️ ${meme.likes || 0}</div>
+                        <div class="action-btn" onclick="shareContent('meme', ${meme.id})">↗️ Поделиться</div>
+                        <div class="action-btn" onclick="document.getElementById('comments-meme-${meme.id}').style.display='block'">💬 ${(currentComments[`meme_${meme.id}`] || []).length}</div>
                     </div>
+                    <div id="comments-meme-${meme.id}" style="display:none"></div>
                 </div>
             `).join('');
+            memes.forEach(meme => {
+                loadComments('meme', meme.id, `comments-meme-${meme.id}`);
+            });
         }
-        
+
         function renderVideos(videos) {
             const container = document.getElementById('videosContainer');
             if (!container) return;
-            if (!videos.length) { container.innerHTML = '<p>Видео пока нет.</p>'; return; }
             container.innerHTML = videos.map(video => `
                 <div class="meme-card">
                     <video controls src="${video.url}"></video>
-                    <div class="meme-caption">${escapeHtml(video.caption || 'Без описания')}</div>
+                    <div class="meme-caption">${escapeHtml(video.caption)}</div>
                     <div class="meme-actions">
                         <div class="action-btn" onclick="likeContent('video', ${video.id})">❤️ ${video.likes || 0}</div>
-                        <div class="action-btn">👤 ${escapeHtml(video.username || 'anon')}</div>
+                        <div class="action-btn" onclick="shareContent('video', ${video.id})">↗️ Поделиться</div>
+                        <div class="action-btn" onclick="document.getElementById('comments-video-${video.id}').style.display='block'">💬 ${(currentComments[`video_${video.id}`] || []).length}</div>
                     </div>
+                    <div id="comments-video-${video.id}" style="display:none"></div>
                 </div>
             `).join('');
+            videos.forEach(video => loadComments('video', video.id, `comments-video-${video.id}`));
         }
-        
+
         function renderAudios(audios) {
             const container = document.getElementById('audiosContainer');
             if (!container) return;
-            if (!audios.length) { container.innerHTML = '<p>Аудио пока нет.</p>'; return; }
             container.innerHTML = audios.map(audio => `
                 <div class="meme-card">
-                    <div style="padding: 20px; text-align: center;">
-                        <div style="font-size: 3rem;">🎵</div>
-                        <div class="meme-caption">${escapeHtml(audio.caption || 'Без описания')}</div>
+                    <div style="padding:20px; text-align:center;">
+                        <div style="font-size:3rem;">🎵</div>
+                        <div class="meme-caption">${escapeHtml(audio.caption)}</div>
                         <button onclick="playAudio('${audio.url}', '${escapeHtml(audio.caption)}')">▶️ Слушать</button>
                         <div class="meme-actions">
                             <div class="action-btn" onclick="likeContent('audio', ${audio.id})">❤️ ${audio.likes || 0}</div>
-                            <div class="action-btn">👤 ${escapeHtml(audio.username || 'anon')}</div>
+                            <div class="action-btn" onclick="shareContent('audio', ${audio.id})">↗️ Поделиться</div>
+                            <div class="action-btn" onclick="document.getElementById('comments-audio-${audio.id}').style.display='block'">💬 ${(currentComments[`audio_${audio.id}`] || []).length}</div>
                         </div>
+                        <div id="comments-audio-${audio.id}" style="display:none"></div>
                     </div>
                 </div>
             `).join('');
+            audios.forEach(audio => loadComments('audio', audio.id, `comments-audio-${audio.id}`));
         }
-        
+
         function renderFeed(feed) {
             const container = document.getElementById('feedContainer');
             if (!container) return;
-            if (!feed.length) { container.innerHTML = '<p>Лента пуста.</p>'; return; }
             container.innerHTML = feed.map(item => `
                 <div class="meme-card">
-                    <video controls style="max-height: 500px; width: 100%;" src="${item.url}"></video>
-                    <div class="meme-caption">${escapeHtml(item.caption || 'Без описания')}</div>
+                    <video controls style="max-height:500px; width:100%" src="${item.url}"></video>
+                    <div class="meme-caption">${escapeHtml(item.caption)}</div>
                     <div class="meme-actions">
                         <div class="action-btn" onclick="likeContent('feed', ${item.id})">❤️ ${item.likes || 0}</div>
-                        <div class="action-btn">👤 ${escapeHtml(item.username || 'anon')}</div>
+                        <div class="action-btn" onclick="shareContent('feed', ${item.id})">↗️ Поделиться</div>
+                        <div class="action-btn" onclick="document.getElementById('comments-feed-${item.id}').style.display='block'">💬 ${(currentComments[`feed_${item.id}`] || []).length}</div>
                     </div>
+                    <div id="comments-feed-${item.id}" style="display:none"></div>
                 </div>
             `).join('');
+            feed.forEach(item => loadComments('feed', item.id, `comments-feed-${item.id}`));
         }
-        
-        function renderSingleMeme(meme) {
-            appRoot.innerHTML = `
-                <div class="single-meme-view">
-                    <div class="meme-card">
-                        ${meme.is_animated ? 
-                            `<video src="${meme.url}" controls style="width:100%"></video>` : 
-                            `<img src="${meme.url}" style="width:100%" onerror="this.src='https://via.placeholder.com/600x400?text=Ошибка'">`}
-                        <div class="meme-caption">${escapeHtml(meme.caption || 'Без описания')}</div>
-                        <div class="meme-actions">
-                            <div class="action-btn" onclick="likeContent('meme', ${meme.id})">❤️ ${meme.likes || 0}</div>
-                            <div class="action-btn">👤 ${escapeHtml(meme.username || 'anon')}</div>
-                        </div>
-                        <button onclick="window.location.href='/'">← На главную</button>
-                    </div>
-                </div>
-            `;
-        }
-        
+
         function renderUploadForm() {
-            const container = document.getElementById('uploadForm');
-            if (!container) return;
-            container.innerHTML = `
+            document.getElementById('uploadForm').innerHTML = `
                 <h2>📤 Загрузить контент</h2>
-                <select id="contentType" style="width:100%; padding:10px; margin-bottom:20px;">
-                    <option value="meme">📷 Мем (изображение или GIF/видео)</option>
-                    <option value="video">🎬 Видео</option>
-                    <option value="audio">🎵 Аудио</option>
-                    <option value="feed">📱 Видео в ленту</option>
+                <select id="contentType" style="width:100%; padding:10px;">
+                    <option value="meme">📷 Мем (изо/видео)</option><option value="video">🎬 Видео</option>
+                    <option value="audio">🎵 Аудио</option><option value="feed">📱 В ленту</option>
                 </select>
                 <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                    <div style="font-size:3rem;">📤</div>
-                    <div>Нажмите для выбора файла</div>
-                    <input type="file" id="fileInput" style="display:none;" accept="image/*,video/*,audio/*">
+                    <div style="font-size:3rem;">📤</div><div>Выбрать файл</div>
+                    <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,audio/*">
                 </div>
-                <input type="text" id="captionInput" placeholder="Введите описание..." style="width:100%; padding:12px; margin:15px 0; border-radius:10px; border:2px solid #ddd;">
-                <button onclick="uploadContent()" style="width:100%;">🚀 Опубликовать</button>
+                <input type="text" id="captionInput" placeholder="Описание..." style="width:100%; padding:12px; margin:10px 0">
+                <button onclick="uploadContent()">Опубликовать</button>
             `;
         }
-        
+
         async function uploadContent() {
-            if (!currentUser) {
-                showNotification('Сначала войдите в аккаунт', 'error');
-                switchSection('profile');
-                return;
-            }
+            if (!currentUser) { showNotification('Войдите', 'error'); return; }
             const file = document.getElementById('fileInput').files[0];
-            if (!file) { showNotification('Выберите файл', 'error'); return; }
+            if (!file) return showNotification('Выберите файл', 'error');
             const formData = new FormData();
             formData.append('file', file);
             formData.append('userId', currentUser.id);
             formData.append('caption', document.getElementById('captionInput').value);
             formData.append('type', document.getElementById('contentType').value);
-            
-            try {
-                const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                if (res.ok) {
-                    showNotification('✅ Опубликовано!');
-                    document.getElementById('fileInput').value = '';
-                    document.getElementById('captionInput').value = '';
-                    loadContent();
-                } else throw new Error('Ошибка загрузки');
-            } catch(e) {
-                showNotification('Ошибка при загрузке', 'error');
-            }
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            if (res.ok) { showNotification('Опубликовано!'); loadContent(); }
+            else showNotification('Ошибка', 'error');
         }
-        
+
         async function loadUsers() {
-            try {
-                const users = await apiRequest('/api/users');
-                const container = document.getElementById('usersContainer');
-                if (!container) return;
-                container.innerHTML = users.map(user => `
-                    <div class="meme-card">
-                        <div style="padding:20px; text-align:center;">
-                            <div style="font-size:3rem;">👤</div>
-                            <div class="meme-caption">${escapeHtml(user.username)}</div>
-                            <div>⭐ ${user.rating || 0}</div>
-                            ${currentUser && currentUser.id !== user.id ? `<button onclick="subscribe(${currentUser.id}, ${user.id})">Подписаться</button>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-                document.getElementById('totalUsers').textContent = users.length;
-            } catch(e) {}
+            const users = await apiRequest('/api/users');
+            document.getElementById('usersContainer').innerHTML = users.map(u => `
+                <div class="meme-card"><div style="padding:20px;text-align:center">
+                    <div style="font-size:3rem;">👤</div>
+                    <div><b>${escapeHtml(u.username)}</b></div>
+                    ${currentUser && currentUser.id !== u.id ? `<button onclick="subscribe(${currentUser.id}, ${u.id})">Подписаться</button>` : ''}
+                </div></div>
+            `).join('');
         }
-        
+
         async function loadProfileUI() {
-            const container = document.getElementById('profileContainer');
-            if (!container) return;
             if (!currentUser) {
-                container.innerHTML = `
-                    <div id="loginForm" class="auth-form">
-                        <h3>🔐 Вход</h3>
-                        <input type="text" id="loginUsername" class="auth-input" placeholder="Имя">
-                        <input type="password" id="loginPassword" class="auth-input" placeholder="Пароль">
-                        <button onclick="login()">Войти</button>
-                        <p style="text-align:center; margin-top:15px;"><a href="#" onclick="showRegister()">Регистрация</a></p>
-                    </div>
-                    <div id="registerForm" class="auth-form" style="display:none;">
-                        <h3>🚀 Регистрация</h3>
-                        <input type="text" id="regUsername" class="auth-input" placeholder="Имя">
-                        <input type="email" id="regEmail" class="auth-input" placeholder="Email">
-                        <input type="password" id="regPassword" class="auth-input" placeholder="Пароль">
-                        <button onclick="register()">Зарегистрироваться</button>
-                        <p style="text-align:center; margin-top:15px;"><a href="#" onclick="showLogin()">Вход</a></p>
-                    </div>
+                document.getElementById('profileContainer').innerHTML = `
+                    <div id="loginForm" class="auth-form"><h3>🔐 Вход</h3>
+                    <input id="loginUsername" class="auth-input" placeholder="Имя"><input id="loginPassword" type="password" class="auth-input" placeholder="Пароль">
+                    <button onclick="login()">Войти</button><p style="text-align:center"><a href="#" onclick="showRegister()">Регистрация</a></p></div>
+                    <div id="registerForm" class="auth-form" style="display:none"><h3>🚀 Регистрация</h3>
+                    <input id="regUsername" class="auth-input" placeholder="Имя"><input id="regEmail" class="auth-input" placeholder="Email">
+                    <input id="regPassword" type="password" class="auth-input" placeholder="Пароль"><button onclick="register()">Зарегистрироваться</button>
+                    <p style="text-align:center"><a href="#" onclick="showLogin()">Вход</a></p></div>
                 `;
                 return;
             }
-            container.innerHTML = `
-                <div class="user-info">
-                    <div style="width:100px; height:100px; background:var(--primary); border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:3rem;">👤</div>
-                    <h2>${escapeHtml(currentUser.username)}</h2>
-                    <p>📅 Присоединился: ${formatDate(currentUser.joinDate)}</p>
-                    <p>⭐ Рейтинг: ${currentUser.rating || 0}</p>
-                    <p>👥 Подписчиков: ${currentUser.subscribers || 0}</p>
-                    <p>📢 Подписок: ${currentUser.subscriptions || 0}</p>
-                    <button onclick="logout()" style="background:var(--accent);">Выйти</button>
-                </div>
-            `;
+            document.getElementById('profileContainer').innerHTML = `<div class="user-info"><h2>${escapeHtml(currentUser.username)}</h2><p>⭐ Рейтинг: ${currentUser.rating || 0}</p><p>👥 Подписчиков: ${currentUser.subscribers || 0}</p><button onclick="logout()">Выйти</button></div>`;
         }
-        
-        async function likeContent(type, id) {
-            if (!currentUser) { showNotification('Войдите в аккаунт', 'error'); return; }
-            try {
-                await apiRequest('/api/like', { method: 'POST', body: JSON.stringify({ userId: currentUser.id, contentType: type, contentId: id }) });
-                loadContent();
-            } catch(e) {}
-        }
-        
-        async function subscribe(subscriberId, targetId) {
-            try {
-                await apiRequest('/api/subscribe', { method: 'POST', body: JSON.stringify({ subscriber_id: subscriberId, subscribed_to_id: targetId }) });
-                showNotification('✅ Готово!');
-                loadUsers();
-            } catch(e) {}
-        }
-        
+
         async function login() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            try {
-                const user = await apiRequest('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
-                currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                showNotification(`Добро пожаловать, ${user.username}!`);
-                document.getElementById('myRating').textContent = user.rating;
-                socket.emit('user_online', user.id);
-                renderHome();
-            } catch(e) {}
-        }
-        
-        async function register() {
-            const username = document.getElementById('regUsername').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            try {
-                await apiRequest('/api/register', { method: 'POST', body: JSON.stringify({ username, email, password }) });
-                showNotification('Регистрация успешна! Теперь войдите.');
-                showLogin();
-            } catch(e) {}
-        }
-        
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            showNotification('Вы вышли');
+            const user = await apiRequest('/api/login', { method: 'POST', body: JSON.stringify({ username: document.getElementById('loginUsername').value, password: document.getElementById('loginPassword').value }) });
+            currentUser = user; localStorage.setItem('currentUser', JSON.stringify(user));
+            socket.emit('user_online', user.id);
+            showNotification(`Добро пожаловать, ${user.username}!`);
             renderHome();
         }
-        
-        function showRegister() {
-            const loginDiv = document.getElementById('loginForm');
-            const regDiv = document.getElementById('registerForm');
-            if (loginDiv) loginDiv.style.display = 'none';
-            if (regDiv) regDiv.style.display = 'block';
+        async function register() {
+            await apiRequest('/api/register', { method: 'POST', body: JSON.stringify({ username: document.getElementById('regUsername').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPassword').value }) });
+            showNotification('Регистрация успешна! Войдите.');
+            showLogin();
         }
-        
-        function showLogin() {
-            const loginDiv = document.getElementById('loginForm');
-            const regDiv = document.getElementById('registerForm');
-            if (loginDiv) loginDiv.style.display = 'block';
-            if (regDiv) regDiv.style.display = 'none';
+        function logout() { currentUser = null; localStorage.removeItem('currentUser'); renderHome(); }
+        function showRegister() { document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; }
+        function showLogin() { document.getElementById('loginForm').style.display='block'; document.getElementById('registerForm').style.display='none'; }
+
+        function renderHome() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('meme')) return; // обработать отдельно
+            document.getElementById('appRoot').innerHTML = `
+                <div id="memes" class="content-section active"><div id="memesContainer"></div></div>
+                <div id="videos" class="content-section"><div id="videosContainer"></div></div>
+                <div id="audios" class="content-section"><div id="audiosContainer"></div></div>
+                <div id="feed" class="content-section"><div id="feedContainer"></div></div>
+                <div id="upload" class="content-section"><div id="uploadForm"></div></div>
+                <div id="users" class="content-section"><div id="usersContainer"></div></div>
+                <div id="profile" class="content-section"><div id="profileContainer"></div></div>
+            `;
+            renderTopNav('memes');
+            loadContent(); loadUsers(); loadProfileUI();
+            socket.on('new_content', () => loadContent());
+            socket.on('like_updated', () => loadContent());
         }
-        
-        function updateStats() {
-            if (currentUser) document.getElementById('myRating').textContent = currentUser.rating || 0;
-        }
-        
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-                return c;
-            });
-        }
-        
-        // --- Загрузка сохранённого пользователя и старт ---
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser) {
-            try {
-                currentUser = JSON.parse(savedUser);
-                if (currentUser.id) socket.emit('user_online', currentUser.id);
-            } catch(e) {}
-        }
+
+        // Запуск
+        const saved = localStorage.getItem('currentUser');
+        if (saved) { currentUser = JSON.parse(saved); socket.emit('user_online', currentUser.id); }
         initPlayer();
-        renderMainApp();
-        
-        // Глобальные функции для onclick
+        renderHome();
+        window.randomMeme = randomMeme;
         window.likeContent = likeContent;
+        window.shareContent = shareContent;
         window.subscribe = subscribe;
         window.login = login;
         window.register = register;
@@ -780,9 +581,7 @@
         window.showLogin = showLogin;
         window.uploadContent = uploadContent;
         window.playAudio = playAudio;
-        window.switchSection = switchSection;
-        window.loadContent = loadContent;
-        window.loadUsers = loadUsers;
+        window.addComment = addComment;
     </script>
 </body>
 </html>
