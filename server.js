@@ -70,7 +70,7 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS memes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
-    image TEXT,
+    url TEXT,
     caption TEXT,
     likes INTEGER DEFAULT 0,
     comments INTEGER DEFAULT 0,
@@ -119,6 +119,18 @@ db.serialize(() => {
     content_id INTEGER,
     UNIQUE(user_id, content_type, content_id)
   )`);
+  
+  db.run(`CREATE TABLE IF NOT EXISTS online_users (
+    user_id INTEGER PRIMARY KEY,
+    last_seen INTEGER
+  )`);
+  
+  db.run(`CREATE TABLE IF NOT EXISTS meme_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    meme_id INTEGER,
+    viewer_id INTEGER,
+    viewed_at INTEGER
+  )`);
 });
 
 // Создание системного пользователя и добавление начальных мемов
@@ -128,17 +140,17 @@ db.get(`SELECT id FROM users WHERE id = 1`, (err, user) => {
   }
   
   db.get(`SELECT COUNT(*) as count FROM memes WHERE user_id = 1`, (err, row) => {
-    if (row.count === 0) {
+    if (row && row.count === 0) {
       const defaultMemes = [
-        { image: "https://i.imgflip.com/30b1gx.jpg", caption: "Два штата - вечная классика! 🤣" },
-        { image: "https://i.imgflip.com/1g8my4.jpg", caption: "Когда показываешь мем другу 😎" },
-        { image: "https://i.imgflip.com/1bij.jpg", caption: "Ожидание vs Реальность 🎭" },
-        { image: "https://i.imgflip.com/aqzqvu.jpg", caption: "Медаль для Обамы: На! Пасиба! 🏅" }
+        { url: "https://i.imgflip.com/30b1gx.jpg", caption: "Два штата - вечная классика! 🤣" },
+        { url: "https://i.imgflip.com/1g8my4.jpg", caption: "Когда показываешь мем другу 😎" },
+        { url: "https://i.imgflip.com/1bij.jpg", caption: "Ожидание vs Реальность 🎭" },
+        { url: "https://i.imgflip.com/aqzqvu.jpg", caption: "Медаль для Обамы: На! Пасиба! 🏅" }
       ];
       
       defaultMemes.forEach(meme => {
-        db.run(`INSERT INTO memes (user_id, image, caption, likes, comments, timestamp) VALUES (1, ?, ?, 0, 0, ?)`,
-          [meme.image, meme.caption, new Date().toISOString()]
+        db.run(`INSERT INTO memes (user_id, url, caption, likes, comments, timestamp, is_animated) VALUES (1, ?, ?, 0, 0, ?, 0)`,
+          [meme.url, meme.caption, new Date().toISOString()]
         );
       });
       console.log('✅ Добавлены начальные мемы в БД');
@@ -256,7 +268,7 @@ app.get('/api/users', (req, res) => {
   });
 });
 
-// Загрузка контента (с поддержкой анимированных мемов — видео)
+// Загрузка контента
 app.post('/api/upload', upload.single('file'), (req, res) => {
   const { userId, caption, type } = req.body;
   const fileUrl = `/uploads/${type}s/${req.file.filename}`;
@@ -333,6 +345,24 @@ app.get('/api/feed', (req, res) => {
   });
 });
 
+// Просмотры
+app.post('/api/view', (req, res) => {
+  const { memeId, userId } = req.body;
+  if (memeId && userId) {
+    db.run(`INSERT INTO meme_views (meme_id, viewer_id, viewed_at) VALUES (?, ?, ?)`,
+      [memeId, userId, Date.now()]);
+  }
+  res.json({ success: true });
+});
+
+// Получение количества просмотров
+app.get('/api/views/:memeId', (req, res) => {
+  const memeId = req.params.memeId;
+  db.get(`SELECT COUNT(*) as views FROM meme_views WHERE meme_id = ?`, [memeId], (err, row) => {
+    res.json({ views: row?.views || 0 });
+  });
+});
+
 // Лайк контента
 app.post('/api/like', (req, res) => {
   const { userId, contentType, contentId } = req.body;
@@ -392,7 +422,35 @@ app.post('/api/like', (req, res) => {
   );
 });
 
-// ========== TELEGRAM УВЕДОМЛЕНИЕ ==========
+// Онлайн пользователи
+setInterval(() => {
+  const now = Date.now();
+  db.run(`DELETE FROM online_users WHERE last_seen < ?`, [now - 60000]);
+}, 60000);
+
+io.on('connection', (socket) => {
+  console.log('Пользователь подключился:', socket.id);
+  
+  socket.on('user_online', (userId) => {
+    socket.userId = userId;
+    db.run(`INSERT OR REPLACE INTO online_users (user_id, last_seen) VALUES (?, ?)`, [userId, Date.now()]);
+    db.all(`SELECT user_id FROM online_users`, (err, users) => {
+      io.emit('online_count', { count: users.length });
+    });
+  });
+  
+  socket.on('disconnect', () => {
+    if (socket.userId) {
+      db.run(`DELETE FROM online_users WHERE user_id = ?`, [socket.userId]);
+      db.all(`SELECT user_id FROM online_users`, (err, users) => {
+        io.emit('online_count', { count: users.length });
+      });
+    }
+    console.log('Пользователь отключился:', socket.id);
+  });
+});
+
+// Telegram уведомление
 async function sendTelegramNotification() {
     const TELEGRAM_BOT_TOKEN = '8611724589:AAFbdZ3xfEyI_fAR9MxsSBE1SMQYiURjJpk';
     const TELEGRAM_CHAT_ID = '-1003818101194';
@@ -412,28 +470,10 @@ async function sendTelegramNotification() {
     }
 }
 
-// ========== WEB SOCKETS ==========
-io.on('connection', (socket) => {
-  console.log('Пользователь подключился:', socket.id);
-  
-  socket.on('user_online', (userId) => {
-    socket.userId = userId;
-    io.emit('user_status', { userId, status: 'online' });
-  });
-  
-  socket.on('disconnect', () => {
-    if (socket.userId) {
-      io.emit('user_status', { userId: socket.userId, status: 'offline' });
-    }
-    console.log('Пользователь отключился:', socket.id);
-  });
-});
-
-// ========== ЗАПУСК СЕРВЕРА ==========
+// Запуск сервера
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Сервер МЕМПОЛИС запущен на порту ${PORT}`);
 });
 
-// ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ ПОСЛЕ ЗАПУСКА
 sendTelegramNotification();
